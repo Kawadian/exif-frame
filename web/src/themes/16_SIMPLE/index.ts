@@ -6,6 +6,13 @@ import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-opt
 import Font from '../../fonts';
 
 const SIMPLE_OPTIONS: ThemeOption[] = [
+  { 
+    id: 'ASPECT_RATIO', 
+    type: 'select', 
+    options: ['free', '1:1', '4:5', '9:16', '2:3', '3:4', '5:4', '3:2', '4:3', '16:9', '16:10', '21:9', '2.39:1'],
+    default: 'free', 
+    description: 'Aspect ratio for the output image' 
+  },
   { id: 'LABEL', type: 'string', default: '@username', description: 'ex. @username' },
   { id: 'FONT_FAMILY', type: 'select', options: ['Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
   { id: 'PADDING_INSIDE', type: 'boolean', default: false, description: 'enable to use inside padding' },
@@ -16,6 +23,7 @@ const SIMPLE_OPTIONS: ThemeOption[] = [
 ];
 
 const SIMPLE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
+  const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const LABEL = (input.get('LABEL') as string).trim();
   const FONT_FAMILY = (input.get('FONT_FAMILY') as string).trim();
   const PADDING_INSIDE = input.get('PADDING_INSIDE') as boolean;
@@ -25,7 +33,7 @@ const SIMPLE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: St
   const PADDING_RIGHT = input.get('PADDING_RIGHT') as number;
 
   const canvas = sandbox(photo, {
-    targetRatio: store.ratio,
+    targetRatio: ASPECT_RATIO === 'free' ? store.ratio : ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: '#ffffff',
     padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
