@@ -21,6 +21,24 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
 
   const canvas = document.createElement('canvas');
   
+  // Helper to parse hex color to rgba
+  const hexToRgba = (hex: string, alpha: number): string => {
+    // Remove # if present
+    hex = hex.replace('#', '');
+    
+    // Handle short hex (e.g., #fff -> #ffffff)
+    if (hex.length === 3) {
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    
+    // Parse RGB components
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+  
   // Track image boundaries for effects
   let imgX = 0, imgY = 0, imgWidth = 0, imgHeight = 0;
 
@@ -48,11 +66,7 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
       context.shadowOffsetX = shadow.offsetX;
       context.shadowOffsetY = shadow.offsetY;
       context.shadowBlur = shadow.blur;
-      const shadowColor = shadow.color;
-      const r = parseInt(shadowColor.slice(1, 3), 16);
-      const g = parseInt(shadowColor.slice(3, 5), 16);
-      const b = parseInt(shadowColor.slice(5, 7), 16);
-      context.shadowColor = `rgba(${r}, ${g}, ${b}, ${shadow.opacity})`;
+      context.shadowColor = hexToRgba(shadow.color, shadow.opacity);
     }
     
     context.drawImage(image, imgX, imgY, imgWidth, imgHeight);

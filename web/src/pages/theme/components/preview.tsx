@@ -10,6 +10,9 @@ import DragHandleIcon from '../../../icons/drag-handle.icon';
 const MIN_HEIGHT = 100;
 const MAX_HEIGHT = 600;
 const DEFAULT_HEIGHT = 250;
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3;
+const PINCH_ZOOM_SENSITIVITY = 200;
 
 interface PreviewProps {
   height: number;
@@ -25,6 +28,8 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
   const dragStartHeight = useRef(0);
   const canvasRef = useRef<HTMLDivElement>(null);
   const lastTouchDistance = useRef<number>(0);
+
+  const clampZoom = (value: number) => Math.min(Math.max(MIN_ZOOM, value), MAX_ZOOM);
 
   const handleDragStart = useCallback(
     (clientY: number) => {
@@ -55,7 +60,7 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
       e.preventDefault();
       const delta = -e.deltaY;
       const zoomFactor = delta > 0 ? 1.1 : 0.9;
-      setScale(prevScale => Math.min(Math.max(0.5, prevScale * zoomFactor), 3));
+      setScale(prevScale => clampZoom(prevScale * zoomFactor));
     }
   }, []);
 
@@ -71,8 +76,8 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
 
       if (lastTouchDistance.current > 0) {
         const delta = distance - lastTouchDistance.current;
-        const zoomFactor = 1 + delta / 200;
-        setScale(prevScale => Math.min(Math.max(0.5, prevScale * zoomFactor), 3));
+        const zoomFactor = 1 + delta / PINCH_ZOOM_SENSITIVITY;
+        setScale(prevScale => clampZoom(prevScale * zoomFactor));
       }
 
       lastTouchDistance.current = distance;
