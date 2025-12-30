@@ -2,12 +2,13 @@ import Photo from '../../core/photo';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
+import { ASPECT_RATIO_OPTIONS } from '../../constants/aspect-ratios';
 
 const JUST_FRAME_OPTIONS: ThemeOption[] = [
   { 
     id: 'ASPECT_RATIO', 
     type: 'select', 
-    options: ['free', '1:1', '4:5', '9:16', '2:3', '3:4', '5:4', '3:2', '4:3', '16:9', '16:10', '21:9', '2.39:1'],
+    options: ASPECT_RATIO_OPTIONS,
     default: 'free', 
     description: 'Aspect ratio for the output image' 
   },
