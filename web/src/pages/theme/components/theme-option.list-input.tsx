@@ -51,7 +51,21 @@ const ThemeOptionListInput = (props: ThemeOption) => {
           key={props.id}
           name={props.id}
           title={props.id}
-          media={<div className="w-5 h-5" style={{ backgroundColor: value as string, outline: `1px solid ${darkMode ? '#fff' : '#000'}` }} />}
+          media={
+            <div className="relative w-7 h-7">
+              <div className="w-full h-full rounded cursor-pointer" style={{ backgroundColor: value as string, outline: `1px solid ${darkMode ? '#fff' : '#000'}` }} />
+              <input
+                type="color"
+                value={value as string}
+                onChange={(e) => {
+                  const newValue = e.target.value;
+                  Customize.set(selectedThemeName, props.id, newValue);
+                  setValue(newValue);
+                }}
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              />
+            </div>
+          }
           value={value}
           onChange={(e) => {
             const value = e.target.value;
