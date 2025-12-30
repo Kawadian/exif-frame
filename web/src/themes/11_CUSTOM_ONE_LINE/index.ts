@@ -4,8 +4,16 @@ import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import Font from '../../fonts';
+import { ASPECT_RATIO_OPTIONS } from '../../constants/aspect-ratios';
 
 const CUSTOM_ONE_LINE_OPTIONS: ThemeOption[] = [
+  { 
+    id: 'ASPECT_RATIO', 
+    type: 'select', 
+    options: ASPECT_RATIO_OPTIONS,
+    default: 'free', 
+    description: 'Aspect ratio for the output image' 
+  },
   { id: 'BACKGROUND_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
   { id: 'PADDING_INSIDE', type: 'boolean', default: true, description: 'enable to use inside padding' },
   { id: 'PADDING_TOP', type: 'number', default: 100, description: 'px' },
@@ -23,6 +31,7 @@ const CUSTOM_ONE_LINE_OPTIONS: ThemeOption[] = [
 ];
 
 const CUSTOM_ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
+  const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const BACKGROUND_COLOR = (input.get('BACKGROUND_COLOR') as string).trim();
   const PADDING_INSIDE = input.get('PADDING_INSIDE') as boolean;
   const PADDING_TOP = input.get('PADDING_TOP') as number;
@@ -40,7 +49,7 @@ const CUSTOM_ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, 
   const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
 
   const canvas = sandbox(photo, {
-    targetRatio: store.ratio,
+    targetRatio: ASPECT_RATIO === 'free' ? store.ratio : ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
