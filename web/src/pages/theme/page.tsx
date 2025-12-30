@@ -1,4 +1,4 @@
-import { BlockTitle, List, Page, Tabbar, TabbarLink } from 'konsta/react';
+import { BlockTitle, List, Navbar, Page, Tabbar, TabbarLink } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
 import { useState } from 'react';
 import { useStore } from '../../store';
@@ -24,7 +24,8 @@ const ThemeSettingsPage = () => {
 
   return (
     <Page style={{ paddingBottom: '10rem' }}>
-      <div className="sticky top-0 z-50 bg-gray-100 dark:bg-gray-900 shadow-md">
+      <Navbar large transparent title={t('root.themes')} />
+      <div className="sticky z-50 bg-gray-100 dark:bg-gray-900 shadow-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
         <Preview height={previewHeight} onHeightChange={setPreviewHeight} />
         <div className="flex justify-center pb-2">
           <RerenderButton />
