@@ -1,14 +1,87 @@
 import render from '../../../core/drawing/render';
-import { useEffect } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useStore } from '../../../store';
 import themes from '../../../themes';
 import { ThemeOptionInput, getConverter } from '../types/theme-option';
 import Customize from '../database/customize';
 import free from '../../../core/drawing/free';
+import DragHandleIcon from '../../../icons/drag-handle.icon';
 
-const Preview = () => {
+const MIN_HEIGHT = 100;
+const MAX_HEIGHT = 600;
+const DEFAULT_HEIGHT = 250;
+
+interface PreviewProps {
+  height: number;
+  onHeightChange: (height: number) => void;
+}
+
+const Preview = ({ height, onHeightChange }: PreviewProps) => {
   const store = useStore();
-  const { selectedThemeName, rerenderOptions, tabIndex, darkMode } = useStore();
+  const { selectedThemeName, rerenderOptions, tabIndex } = useStore();
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartY = useRef(0);
+  const dragStartHeight = useRef(0);
+
+  const handleDragStart = useCallback(
+    (clientY: number) => {
+      setIsDragging(true);
+      dragStartY.current = clientY;
+      dragStartHeight.current = height;
+    },
+    [height]
+  );
+
+  const handleDragMove = useCallback(
+    (clientY: number) => {
+      if (!isDragging) return;
+      const delta = clientY - dragStartY.current;
+      const newHeight = Math.min(MAX_HEIGHT, Math.max(MIN_HEIGHT, dragStartHeight.current + delta));
+      onHeightChange(newHeight);
+    },
+    [isDragging, onHeightChange]
+  );
+
+  const handleDragEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  // マウスイベント
+  const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleDragStart(e.clientY);
+  };
+
+  // タッチイベント
+  const handleTouchStart = (e: React.TouchEvent) => {
+    handleDragStart(e.touches[0].clientY);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => handleDragMove(e.clientY);
+    const handleMouseUp = () => handleDragEnd();
+    const handleTouchMove = (e: TouchEvent) => {
+      if (isDragging) {
+        e.preventDefault();
+        handleDragMove(e.touches[0].clientY);
+      }
+    };
+    const handleTouchEnd = () => handleDragEnd();
+
+    if (isDragging) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isDragging, handleDragMove, handleDragEnd]);
 
   useEffect(() => {
     const preview = document.getElementById('preview') as HTMLCanvasElement;
@@ -42,16 +115,32 @@ const Preview = () => {
         preview.width = 1000 * ratio;
       }
       ctx.clearRect(0, 0, preview.width, preview.height);
-      ctx.fillStyle = darkMode ? '#000000' : '#ffffff';
-      ctx.fillRect(0, 0, preview.width, preview.height);
-      ctx.fillStyle = '#ffffff';
       ctx.drawImage(canvas, 0, 0, preview.width, preview.height);
       free(canvas);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedThemeName, rerenderOptions, tabIndex]);
 
-  return <canvas id="preview" className="w-4/6 md:w-2/6 mx-auto mt-4" style={{ maxHeight: '1000px', maxWidth: '1000px', backgroundColor: darkMode ? '#000000' : '#ffffff' }} />;
+  return (
+    <div className="flex flex-col items-center">
+      <div className="w-full flex justify-center items-center overflow-hidden" style={{ height: `${height}px` }}>
+        <canvas id="preview" className="max-w-full max-h-full object-contain" style={{ maxHeight: `${height}px` }} />
+      </div>
+      {/* ドラッグハンドル */}
+      <div
+        className={`w-full flex justify-center py-2 cursor-ns-resize select-none touch-none ${
+          isDragging ? 'bg-gray-200 dark:bg-gray-700' : 'hover:bg-gray-100 dark:hover:bg-gray-800'
+        } transition-colors`}
+        onMouseDown={handleMouseDown}
+        onTouchStart={handleTouchStart}
+      >
+        <div className="text-gray-400 dark:text-gray-500">
+          <DragHandleIcon size={20} />
+        </div>
+      </div>
+    </div>
+  );
 };
 
+export { DEFAULT_HEIGHT, MIN_HEIGHT, MAX_HEIGHT };
 export default Preview;
