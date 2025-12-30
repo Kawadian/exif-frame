@@ -7,34 +7,65 @@ interface SandboxOptions {
   padding: { top: number; bottom: number; left: number; right: number };
   targetRatio: string;
   notCroppedMode: boolean;
+  photoBorder?: { width: number; color: string };
+  shadow?: { offsetX: number; offsetY: number; blur: number; color: string; opacity: number };
 }
 
 const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
   const { image } = photo;
-  const { backgroundColor, padding, targetRatio, notCroppedMode } = options;
+  const { backgroundColor, padding, targetRatio, notCroppedMode, photoBorder, shadow } = options;
   const { top, bottom, left, right } = padding;
 
   const canvas = document.createElement('canvas');
+  
+  // Track image boundaries for effects
+  let imgX = 0, imgY = 0, imgWidth = 0, imgHeight = 0;
 
   if (targetRatio === 'free') {
-    let imageWidth = null;
-    let imageHeight = null;
-
     if (image.width > image.height) {
-      imageWidth = MAX_SIZE - left - right;
-      imageHeight = (image.height / image.width) * imageWidth;
+      imgWidth = MAX_SIZE - left - right;
+      imgHeight = (image.height / image.width) * imgWidth;
     } else {
-      imageHeight = MAX_SIZE - top - bottom;
-      imageWidth = (image.width / image.height) * imageHeight;
+      imgHeight = MAX_SIZE - top - bottom;
+      imgWidth = (image.width / image.height) * imgHeight;
     }
 
-    canvas.width = imageWidth + left + right;
-    canvas.height = imageHeight + top + bottom;
+    canvas.width = imgWidth + left + right;
+    canvas.height = imgHeight + top + bottom;
+    
+    imgX = left;
+    imgY = top;
 
     const context = canvas.getContext('2d')!;
     context.fillStyle = backgroundColor;
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, left, top, imageWidth, imageHeight);
+    
+    // Apply shadow before drawing the image
+    if (shadow && shadow.blur > 0) {
+      context.shadowOffsetX = shadow.offsetX;
+      context.shadowOffsetY = shadow.offsetY;
+      context.shadowBlur = shadow.blur;
+      const shadowColor = shadow.color;
+      const r = parseInt(shadowColor.slice(1, 3), 16);
+      const g = parseInt(shadowColor.slice(3, 5), 16);
+      const b = parseInt(shadowColor.slice(5, 7), 16);
+      context.shadowColor = `rgba(${r}, ${g}, ${b}, ${shadow.opacity})`;
+    }
+    
+    context.drawImage(image, imgX, imgY, imgWidth, imgHeight);
+    
+    // Reset shadow
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 0;
+    context.shadowBlur = 0;
+    context.shadowColor = 'transparent';
+    
+    // Apply photo border if specified
+    if (photoBorder && photoBorder.width > 0) {
+      context.strokeStyle = photoBorder.color;
+      context.lineWidth = photoBorder.width;
+      context.strokeRect(imgX, imgY, imgWidth, imgHeight);
+    }
   } else {
     const ratio = targetRatio.split(':').map((value) => Number(value));
 

@@ -20,8 +20,11 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
   const store = useStore();
   const { selectedThemeName, rerenderOptions, tabIndex } = useStore();
   const [isDragging, setIsDragging] = useState(false);
+  const [scale, setScale] = useState(1);
   const dragStartY = useRef(0);
   const dragStartHeight = useRef(0);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  const lastTouchDistance = useRef<number>(0);
 
   const handleDragStart = useCallback(
     (clientY: number) => {
@@ -45,6 +48,59 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
   const handleDragEnd = useCallback(() => {
     setIsDragging(false);
   }, []);
+
+  // Zoom handlers
+  const handleWheel = useCallback((e: WheelEvent) => {
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      const delta = -e.deltaY;
+      const zoomFactor = delta > 0 ? 1.1 : 0.9;
+      setScale(prevScale => Math.min(Math.max(0.5, prevScale * zoomFactor), 3));
+    }
+  }, []);
+
+  const handlePinchZoom = useCallback((e: TouchEvent) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const touch1 = e.touches[0];
+      const touch2 = e.touches[1];
+      const distance = Math.sqrt(
+        Math.pow(touch2.clientX - touch1.clientX, 2) +
+        Math.pow(touch2.clientY - touch1.clientY, 2)
+      );
+
+      if (lastTouchDistance.current > 0) {
+        const delta = distance - lastTouchDistance.current;
+        const zoomFactor = 1 + delta / 200;
+        setScale(prevScale => Math.min(Math.max(0.5, prevScale * zoomFactor), 3));
+      }
+
+      lastTouchDistance.current = distance;
+    }
+  }, []);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (e.touches.length < 2) {
+      lastTouchDistance.current = 0;
+    }
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (canvas) {
+      canvas.addEventListener('wheel', handleWheel, { passive: false });
+      canvas.addEventListener('touchmove', handlePinchZoom, { passive: false });
+      canvas.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      if (canvas) {
+        canvas.removeEventListener('wheel', handleWheel);
+        canvas.removeEventListener('touchmove', handlePinchZoom);
+        canvas.removeEventListener('touchend', handleTouchEnd);
+      }
+    };
+  }, [handleWheel, handlePinchZoom, handleTouchEnd]);
 
   // マウスイベント
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -123,8 +179,18 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
 
   return (
     <div className="flex flex-col items-center">
-      <div className="w-full flex justify-center items-center overflow-hidden" style={{ height: `${height}px` }}>
-        <canvas id="preview" className="max-w-full max-h-full object-contain" style={{ maxHeight: `${height}px` }} />
+      <div ref={canvasRef} className="w-full flex justify-center items-center overflow-hidden" style={{ height: `${height}px` }}>
+        <canvas 
+          id="preview" 
+          className="max-w-full max-h-full object-contain" 
+          style={{ 
+            maxHeight: `${height}px`,
+            transform: `scale(${scale})`,
+            transformOrigin: 'center center',
+            transition: 'transform 0.1s ease-out',
+            cursor: scale > 1 ? 'grab' : 'default'
+          }} 
+        />
       </div>
       {/* ドラッグハンドル */}
       <div
