@@ -7,7 +7,7 @@ import Font from '../../fonts';
 
 const FILM_OPTIONS: ThemeOption[] = [
   { id: 'ARTIST', type: 'string', default: '', description: 'your name' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Barlow', ...Object.values(Font)], default: 'digital-7', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
+  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'digital-7', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
   { id: 'TEXT_COLOR', type: 'color', default: '#FFA500', description: 'default is orange hex code' },
   { id: 'TEXT_ALPHA', type: 'range-slider', default: 1, min: 0, max: 1, step: 0.01, description: '0 - 1' },
   { id: 'BACKGROUND_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
@@ -20,6 +20,7 @@ const FILM_OPTIONS: ThemeOption[] = [
 const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
   const ARTIST = (input.get('ARTIST') as string).trim();
   const FONT_FAMILY = (input.get('FONT_FAMILY') as string).trim();
+  const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
   const TEXT_COLOR = input.get('TEXT_COLOR') as string;
   const TEXT_ALPHA = input.get('TEXT_ALPHA') as number;
   const BACKGROUND_COLOR = (input.get('BACKGROUND_COLOR') as string).trim();
@@ -48,18 +49,18 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
     ];
 
     context.textAlign = 'right';
-    context.font = `100px ${FONT_FAMILY}`;
+    context.font = `100px ${actualFontFamily}`;
     for (let i = 0; i < datas.length; i++) {
       const data = datas[i];
       context.fillText(data.value, canvas.width - 100, canvas.height - 100 - i * 100);
       const width = context.measureText(data.value).width;
-      context.font = `60px ${FONT_FAMILY}`;
+      context.font = `60px ${actualFontFamily}`;
       context.fillText(data.key, canvas.width - 100 - width - 20, canvas.height - 110 - i * 100);
-      context.font = `100px ${FONT_FAMILY}`;
+      context.font = `100px ${actualFontFamily}`;
     }
   }
 
-  context.font = `70px ${FONT_FAMILY}`;
+  context.font = `70px ${actualFontFamily}`;
   context.textAlign = 'left';
   context.fillText(
     [store.showLensModel ? store.overrideLensModel || photo.lensModel : null]
@@ -77,7 +78,7 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
     100,
     canvas.height - 205
   );
-  context.font = `50px ${FONT_FAMILY}`;
+  context.font = `50px ${actualFontFamily}`;
   context.fillText(ARTIST ? ARTIST : photo.takenAt, 100, canvas.height - 305);
 
   context.globalAlpha = 1;

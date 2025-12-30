@@ -7,34 +7,82 @@ interface SandboxOptions {
   padding: { top: number; bottom: number; left: number; right: number };
   targetRatio: string;
   notCroppedMode: boolean;
+  photoBorder?: { width: number; color: string };
+  shadow?: { offsetX: number; offsetY: number; blur: number; color: string; opacity: number };
 }
+
+// Note: Shadow and photo border effects are currently only applied in 'free' ratio mode
+// to maintain simplicity and avoid potential rendering issues in complex ratio-based layouts
 
 const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
   const { image } = photo;
-  const { backgroundColor, padding, targetRatio, notCroppedMode } = options;
+  const { backgroundColor, padding, targetRatio, notCroppedMode, photoBorder, shadow } = options;
   const { top, bottom, left, right } = padding;
 
   const canvas = document.createElement('canvas');
+  
+  // Helper to parse hex color to rgba
+  const hexToRgba = (hex: string, alpha: number): string => {
+    // Remove # if present
+    hex = hex.replace('#', '');
+    
+    // Handle short hex (e.g., #fff -> #ffffff)
+    if (hex.length === 3) {
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    
+    // Parse RGB components
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+  
+  // Track image boundaries for effects
+  let imgX = 0, imgY = 0, imgWidth = 0, imgHeight = 0;
 
   if (targetRatio === 'free') {
-    let imageWidth = null;
-    let imageHeight = null;
-
     if (image.width > image.height) {
-      imageWidth = MAX_SIZE - left - right;
-      imageHeight = (image.height / image.width) * imageWidth;
+      imgWidth = MAX_SIZE - left - right;
+      imgHeight = (image.height / image.width) * imgWidth;
     } else {
-      imageHeight = MAX_SIZE - top - bottom;
-      imageWidth = (image.width / image.height) * imageHeight;
+      imgHeight = MAX_SIZE - top - bottom;
+      imgWidth = (image.width / image.height) * imgHeight;
     }
 
-    canvas.width = imageWidth + left + right;
-    canvas.height = imageHeight + top + bottom;
+    canvas.width = imgWidth + left + right;
+    canvas.height = imgHeight + top + bottom;
+    
+    imgX = left;
+    imgY = top;
 
     const context = canvas.getContext('2d')!;
     context.fillStyle = backgroundColor;
     context.fillRect(0, 0, canvas.width, canvas.height);
-    context.drawImage(image, left, top, imageWidth, imageHeight);
+    
+    // Apply shadow before drawing the image
+    if (shadow && shadow.blur > 0) {
+      context.shadowOffsetX = shadow.offsetX;
+      context.shadowOffsetY = shadow.offsetY;
+      context.shadowBlur = shadow.blur;
+      context.shadowColor = hexToRgba(shadow.color, shadow.opacity);
+    }
+    
+    context.drawImage(image, imgX, imgY, imgWidth, imgHeight);
+    
+    // Reset shadow
+    context.shadowOffsetX = 0;
+    context.shadowOffsetY = 0;
+    context.shadowBlur = 0;
+    context.shadowColor = 'transparent';
+    
+    // Apply photo border if specified
+    if (photoBorder && photoBorder.width > 0) {
+      context.strokeStyle = photoBorder.color;
+      context.lineWidth = photoBorder.width;
+      context.strokeRect(imgX, imgY, imgWidth, imgHeight);
+    }
   } else {
     const ratio = targetRatio.split(':').map((value) => Number(value));
 

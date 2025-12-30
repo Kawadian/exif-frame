@@ -22,7 +22,7 @@ const THREE_LINE_OPTIONS: ThemeOption[] = [
   { id: 'FONT_STYLE', type: 'select', options: ['normal', 'italic'], default: 'normal', description: 'normal or italic' },
   { id: 'FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 500, description: '100 - 900' },
   { id: 'FONT_SIZE', type: 'number', default: 70, description: 'px' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
+  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
   // Top Label
   { id: 'TOP_LABEL', type: 'string', default: '', description: 'ex. @username' },
   // Logo Settings
@@ -53,6 +53,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
   const FONT_WEIGHT = input.get('FONT_WEIGHT') as number;
   const FONT_SIZE = input.get('FONT_SIZE') as number;
   const FONT_FAMILY = (input.get('FONT_FAMILY') as string).trim();
+  const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
   // Top Label
   const TOP_LABEL = (input.get('TOP_LABEL') as string).trim();
   // Logo Settings
@@ -75,7 +76,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
 
   const context = canvas.getContext('2d')!;
   context.textBaseline = 'middle';
-  context.font = `${FONT_STYLE} ${FONT_WEIGHT} ${FONT_SIZE}px ${FONT_FAMILY}`;
+  context.font = `${FONT_STYLE} ${FONT_WEIGHT} ${FONT_SIZE}px ${actualFontFamily}`;
   context.fillStyle = TEXT_COLOR;
   context.globalAlpha = TEXT_ALPHA;
 

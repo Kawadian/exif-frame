@@ -18,7 +18,7 @@ const TWO_LINE_OPTIONS: ThemeOption[] = [
   { id: 'FONT_STYLE', type: 'select', options: ['normal', 'italic'], default: 'normal', description: 'normal or italic' },
   { id: 'FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 - 900' },
   { id: 'FONT_SIZE', type: 'number', default: 70, description: 'px' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
+  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
   { id: 'TOP_LABEL', type: 'string', default: '', description: 'ex. @username' },
   { id: 'DIVIDER', type: 'string', default: '∙', description: 'ex. |' },
   { id: 'TEMPLATE1', type: 'string', default: '{MAKER}{BODY}{LENS}' },
@@ -39,6 +39,7 @@ const TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
   const FONT_WEIGHT = input.get('FONT_WEIGHT') as number;
   const FONT_SIZE = input.get('FONT_SIZE') as number;
   const FONT_FAMILY = (input.get('FONT_FAMILY') as string).trim();
+  const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
   const TOP_LABEL = (input.get('TOP_LABEL') as string).trim();
   const DIVIDER = (input.get('DIVIDER') as string).trim();
   const TEMPLATE1 = (input.get('TEMPLATE1') as string).trim();
@@ -54,7 +55,7 @@ const TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
   const context = canvas.getContext('2d')!;
   context.fillStyle = TEXT_COLOR;
   context.textBaseline = 'middle';
-  context.font = `${FONT_STYLE} ${FONT_WEIGHT} ${FONT_SIZE}px ${FONT_FAMILY}`;
+  context.font = `${FONT_STYLE} ${FONT_WEIGHT} ${FONT_SIZE}px ${actualFontFamily}`;
   context.textAlign = 'center';
   context.globalAlpha = TEXT_ALPHA;
   context.fillText(TOP_LABEL, canvas.width / 2, PADDING_TOP / 2);
