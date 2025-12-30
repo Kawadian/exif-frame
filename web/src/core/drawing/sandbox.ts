@@ -11,6 +11,9 @@ interface SandboxOptions {
   shadow?: { offsetX: number; offsetY: number; blur: number; color: string; opacity: number };
 }
 
+// Note: Shadow and photo border effects are currently only applied in 'free' ratio mode
+// to maintain simplicity and avoid potential rendering issues in complex ratio-based layouts
+
 const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
   const { image } = photo;
   const { backgroundColor, padding, targetRatio, notCroppedMode, photoBorder, shadow } = options;
