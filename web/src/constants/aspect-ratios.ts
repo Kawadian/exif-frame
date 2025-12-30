@@ -1,4 +1,6 @@
 // Common aspect ratios available for theme customization
+// Note: Decimal ratios like '2.39:1' are supported because the sandbox function
+// uses Number() which correctly parses decimal strings like '2.39'
 export const ASPECT_RATIO_OPTIONS = [
   'free',      // Uses global setting
   '1:1',       // Square (Instagram)
@@ -12,5 +14,5 @@ export const ASPECT_RATIO_OPTIONS = [
   '16:9',      // Widescreen HD
   '16:10',     // Widescreen display
   '21:9',      // Ultra-wide cinematic
-  '2.39:1',    // Anamorphic widescreen
+  '2.39:1',    // Anamorphic widescreen (decimal format is supported)
 ];
