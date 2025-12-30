@@ -21,9 +21,11 @@ const ThemeSettingsPage = () => {
     <Page style={{ paddingBottom: '10rem' }}>
       <Navbar large transparent title={t('root.themes')} />
 
-      <Preview />
-      <div className="flex justify-center mt-4">
-        <RerenderButton />
+      <div className="sticky top-0 z-10 bg-white dark:bg-black">
+        <Preview />
+        <div className="flex justify-center mt-4 pb-4">
+          <RerenderButton />
+        </div>
       </div>
 
       <BlockTitle>{t('root.themes.list')}</BlockTitle>
