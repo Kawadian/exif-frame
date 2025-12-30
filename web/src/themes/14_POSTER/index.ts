@@ -25,7 +25,7 @@ const POSTER_OPTIONS: ThemeOption[] = [
   { id: 'TEXT4_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 500, description: '100 ~ 900' },
   { id: 'TEXT5_SIZE', type: 'number', default: 80, description: 'px' },
   { id: 'TEXT5_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 ~ 900' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
+  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
   { id: 'SHADOW_SIZE', type: 'number', default: 10, description: '0 ~ 100' },
 ];
 
@@ -50,6 +50,7 @@ const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: St
   const TEXT5_SIZE = input.get('TEXT5_SIZE') as number;
   const TEXT5_WEIGHT = input.get('TEXT5_WEIGHT') as number;
   const FONT_FAMILY = (input.get('FONT_FAMILY') as string).trim();
+  const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
   const SHADOW_SIZE = input.get('SHADOW_SIZE') as number;
 
   const canvas = sandbox(photo, {
@@ -66,19 +67,19 @@ const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: St
   context.textBaseline = 'middle';
   context.textAlign = 'left';
 
-  context.font = `normal ${TEXT1_WEIGHT} ${TEXT1_SIZE}px ${FONT_FAMILY}`;
+  context.font = `normal ${TEXT1_WEIGHT} ${TEXT1_SIZE}px ${actualFontFamily}`;
   context.fillText(TEXT1, PADDING_LEFT, PADDING_TOP);
 
-  context.font = `normal ${TEXT2_WEIGHT} ${TEXT2_SIZE}px ${FONT_FAMILY}`;
+  context.font = `normal ${TEXT2_WEIGHT} ${TEXT2_SIZE}px ${actualFontFamily}`;
   context.fillText(TEXT2, PADDING_LEFT, PADDING_TOP + TEXT1_SIZE * 2);
 
-  context.font = `normal ${TEXT3_WEIGHT} ${TEXT3_SIZE}px ${FONT_FAMILY}`;
+  context.font = `normal ${TEXT3_WEIGHT} ${TEXT3_SIZE}px ${actualFontFamily}`;
   context.fillText(TEXT3, PADDING_LEFT, PADDING_TOP + TEXT1_SIZE * 2 + TEXT2_SIZE * 1.2);
 
-  context.font = `normal ${TEXT4_WEIGHT} ${TEXT4_SIZE}px ${FONT_FAMILY}`;
+  context.font = `normal ${TEXT4_WEIGHT} ${TEXT4_SIZE}px ${actualFontFamily}`;
   context.fillText(TEXT4, PADDING_LEFT, canvas.height - PADDING_BOTTOM - TEXT5_SIZE * 1.5);
 
-  context.font = `normal ${TEXT5_WEIGHT} ${TEXT5_SIZE}px ${FONT_FAMILY}`;
+  context.font = `normal ${TEXT5_WEIGHT} ${TEXT5_SIZE}px ${actualFontFamily}`;
   context.fillText(TEXT5, PADDING_LEFT, canvas.height - PADDING_BOTTOM);
 
   return canvas;
