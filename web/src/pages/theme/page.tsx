@@ -1,6 +1,6 @@
 import { BlockTitle, List, Navbar, Page, Tabbar, TabbarLink } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useStore } from '../../store';
 import SettingsIcon from '../../icons/settings.icon';
 import ImageIcon from '../../icons/image.icon';
@@ -11,6 +11,7 @@ import ThemeOptionListInput from './components/theme-option.list-input';
 import Loading from '../convert/components/loading';
 import ThemeOptionResetButton from './components/theme-option-reset.button';
 import Preview, { DEFAULT_HEIGHT } from './components/preview';
+import type { PreviewRef } from './components/preview';
 import RerenderButton from './components/rerender.button';
 
 const ThemeSettingsPage = () => {
@@ -19,16 +20,18 @@ const ThemeSettingsPage = () => {
   const theme = themes.find((theme) => theme.name === selectedThemeName);
   const [activeSubTab, setActiveSubTab] = useState<'list' | 'customize'>('list');
   const [previewHeight, setPreviewHeight] = useState(DEFAULT_HEIGHT);
+  const previewRef = useRef<PreviewRef>(null);
 
   const hasCustomizeOptions = theme?.options && theme.options.length > 0;
 
   return (
     <Page style={{ paddingBottom: '10rem' }}>
       <Navbar large transparent title={t('root.themes')} />
-      <div className="sticky z-50 bg-gray-100 dark:bg-gray-900 shadow-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
-        <Preview height={previewHeight} onHeightChange={setPreviewHeight} />
-        <div className="flex justify-center pb-2">
+      <div className="sticky z-50 bg-gray-100 dark:bg-black shadow-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
+        <Preview ref={previewRef} height={previewHeight} onHeightChange={setPreviewHeight} />
+        <div className="flex justify-center pb-2 gap-2">
           <RerenderButton />
+          <RerenderButton isZoomReset onClick={() => previewRef.current?.resetZoom()} />
         </div>
 
         {/* サブタブ切り替え */}
