@@ -319,11 +319,11 @@ const Preview = forwardRef<PreviewRef, PreviewProps>(({ height, onHeightChange }
       const ctx = preview.getContext('2d')!;
       const ratio = canvas.width / canvas.height;
       if (preview.width > preview.height) {
-        preview.width = 1000;
-        preview.height = 1000 / ratio;
+        preview.width = 4000;
+        preview.height = 4000 / ratio;
       } else {
-        preview.height = 1000;
-        preview.width = 1000 * ratio;
+        preview.height = 4000;
+        preview.width = 4000 * ratio;
       }
       ctx.clearRect(0, 0, preview.width, preview.height);
       ctx.drawImage(canvas, 0, 0, preview.width, preview.height);
