@@ -24,32 +24,12 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
   const { selectedThemeName, rerenderOptions, tabIndex } = useStore();
   const [isDragging, setIsDragging] = useState(false);
   const [scale, setScale] = useState(1);
-  const [panX, setPanX] = useState(0);
-  const [panY, setPanY] = useState(0);
-  const [isPanning, setIsPanning] = useState(false);
   const dragStartY = useRef(0);
   const dragStartHeight = useRef(0);
-  const panStartX = useRef(0);
-  const panStartY = useRef(0);
-  const panStartOffsetX = useRef(0);
-  const panStartOffsetY = useRef(0);
   const canvasRef = useRef<HTMLDivElement>(null);
   const lastTouchDistance = useRef<number>(0);
-  const lastTouchCenter = useRef<{ x: number; y: number } | null>(null);
 
   const clampZoom = (value: number) => Math.min(Math.max(MIN_ZOOM, value), MAX_ZOOM);
-
-  const shouldEnablePan = (element: EventTarget | null) => {
-    return scale > 1 && element instanceof HTMLElement && !element.classList.contains('cursor-ns-resize');
-  };
-
-  const startPanning = (clientX: number, clientY: number) => {
-    setIsPanning(true);
-    panStartX.current = clientX;
-    panStartY.current = clientY;
-    panStartOffsetX.current = panX;
-    panStartOffsetY.current = panY;
-  };
 
   const handleDragStart = useCallback(
     (clientY: number) => {
@@ -78,33 +58,9 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
   const handleWheel = useCallback((e: WheelEvent) => {
     if (e.ctrlKey || e.metaKey) {
       e.preventDefault();
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-
-      const rect = canvas.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left;
-      const mouseY = e.clientY - rect.top;
-
       const delta = -e.deltaY;
       const zoomFactor = delta > 0 ? 1.1 : 0.9;
-      
-      setScale(prevScale => {
-        const newScale = clampZoom(prevScale * zoomFactor);
-        
-        // Calculate zoom origin relative to canvas center
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-        const offsetX = mouseX - centerX;
-        const offsetY = mouseY - centerY;
-        
-        // Adjust pan to zoom towards cursor (guard against division by zero)
-        if (prevScale > 0) {
-          setPanX(prevPanX => prevPanX - offsetX * (newScale / prevScale - 1));
-          setPanY(prevPanY => prevPanY - offsetY * (newScale / prevScale - 1));
-        }
-        
-        return newScale;
-      });
+      setScale(prevScale => clampZoom(prevScale * zoomFactor));
     }
   }, []);
 
@@ -118,46 +74,19 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
         Math.pow(touch2.clientY - touch1.clientY, 2)
       );
 
-      const centerX = (touch1.clientX + touch2.clientX) / 2;
-      const centerY = (touch1.clientY + touch2.clientY) / 2;
-
-      if (lastTouchDistance.current > 0 && lastTouchCenter.current) {
+      if (lastTouchDistance.current > 0) {
         const delta = distance - lastTouchDistance.current;
         const zoomFactor = 1 + delta / PINCH_ZOOM_SENSITIVITY;
-        
-        const canvas = canvasRef.current;
-        if (canvas) {
-          const rect = canvas.getBoundingClientRect();
-          const touchX = centerX - rect.left;
-          const touchY = centerY - rect.top;
-          const canvasCenterX = rect.width / 2;
-          const canvasCenterY = rect.height / 2;
-          const offsetX = touchX - canvasCenterX;
-          const offsetY = touchY - canvasCenterY;
-
-          setScale(prevScale => {
-            const newScale = clampZoom(prevScale * zoomFactor);
-            
-            // Adjust pan to zoom towards touch center (guard against division by zero)
-            if (prevScale > 0) {
-              setPanX(prevPanX => prevPanX - offsetX * (newScale / prevScale - 1));
-              setPanY(prevPanY => prevPanY - offsetY * (newScale / prevScale - 1));
-            }
-            
-            return newScale;
-          });
-        }
+        setScale(prevScale => clampZoom(prevScale * zoomFactor));
       }
 
       lastTouchDistance.current = distance;
-      lastTouchCenter.current = { x: centerX, y: centerY };
     }
   }, []);
 
   const handleTouchEnd = useCallback((e: TouchEvent) => {
     if (e.touches.length < 2) {
       lastTouchDistance.current = 0;
-      lastTouchCenter.current = null;
     }
   }, []);
 
@@ -178,76 +107,29 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
     };
   }, [handleWheel, handlePinchZoom, handleTouchEnd]);
 
-  // Reset pan when scale is 1
-  useEffect(() => {
-    if (scale === 1) {
-      setPanX(0);
-      setPanY(0);
-    }
-  }, [scale]);
-
   // マウスイベント
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (shouldEnablePan(e.currentTarget)) {
-      // Pan mode when zoomed
-      e.preventDefault();
-      startPanning(e.clientX, e.clientY);
-    } else {
-      // Resize mode
-      e.preventDefault();
-      handleDragStart(e.clientY);
-    }
+    e.preventDefault();
+    handleDragStart(e.clientY);
   };
 
   // タッチイベント
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && shouldEnablePan(e.currentTarget)) {
-      // Pan mode when zoomed with single touch
-      startPanning(e.touches[0].clientX, e.touches[0].clientY);
-    } else if (e.touches.length === 1) {
-      // Resize mode with single touch
-      handleDragStart(e.touches[0].clientY);
-    }
+    handleDragStart(e.touches[0].clientY);
   };
 
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (isPanning) {
-        const deltaX = e.clientX - panStartX.current;
-        const deltaY = e.clientY - panStartY.current;
-        setPanX(panStartOffsetX.current + deltaX);
-        setPanY(panStartOffsetY.current + deltaY);
-      } else {
-        handleDragMove(e.clientY);
-      }
-    };
-    
-    const handleMouseUp = () => {
-      setIsPanning(false);
-      handleDragEnd();
-    };
-    
+    const handleMouseMove = (e: MouseEvent) => handleDragMove(e.clientY);
+    const handleMouseUp = () => handleDragEnd();
     const handleTouchMove = (e: TouchEvent) => {
-      if (e.touches.length === 1) {
-        if (isPanning) {
-          e.preventDefault();
-          const deltaX = e.touches[0].clientX - panStartX.current;
-          const deltaY = e.touches[0].clientY - panStartY.current;
-          setPanX(panStartOffsetX.current + deltaX);
-          setPanY(panStartOffsetY.current + deltaY);
-        } else if (isDragging) {
-          e.preventDefault();
-          handleDragMove(e.touches[0].clientY);
-        }
+      if (isDragging) {
+        e.preventDefault();
+        handleDragMove(e.touches[0].clientY);
       }
     };
-    
-    const handleTouchEnd = () => {
-      setIsPanning(false);
-      handleDragEnd();
-    };
+    const handleTouchEnd = () => handleDragEnd();
 
-    if (isDragging || isPanning) {
+    if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
       document.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -260,7 +142,7 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isDragging, isPanning, handleDragMove, handleDragEnd]);
+  }, [isDragging, handleDragMove, handleDragEnd]);
 
   useEffect(() => {
     const preview = document.getElementById('preview') as HTMLCanvasElement;
@@ -308,13 +190,11 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
           className="max-w-full max-h-full object-contain" 
           style={{ 
             maxHeight: `${height}px`,
-            transform: `translate(${panX}px, ${panY}px) scale(${scale})`,
+            transform: `scale(${scale})`,
             transformOrigin: 'center center',
-            transition: isPanning ? 'none' : 'transform 0.1s ease-out',
-            cursor: scale > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default'
-          }}
-          onMouseDown={handleMouseDown}
-          onTouchStart={handleTouchStart}
+            transition: 'transform 0.1s ease-out',
+            cursor: scale > 1 ? 'grab' : 'default'
+          }} 
         />
       </div>
       {/* ドラッグハンドル */}
