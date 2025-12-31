@@ -39,6 +39,18 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
 
   const clampZoom = (value: number) => Math.min(Math.max(MIN_ZOOM, value), MAX_ZOOM);
 
+  const shouldEnablePan = (element: EventTarget | null) => {
+    return scale > 1 && element instanceof HTMLElement && !element.classList.contains('cursor-ns-resize');
+  };
+
+  const startPanning = (clientX: number, clientY: number) => {
+    setIsPanning(true);
+    panStartX.current = clientX;
+    panStartY.current = clientY;
+    panStartOffsetX.current = panX;
+    panStartOffsetY.current = panY;
+  };
+
   const handleDragStart = useCallback(
     (clientY: number) => {
       setIsDragging(true);
@@ -85,9 +97,11 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
         const offsetX = mouseX - centerX;
         const offsetY = mouseY - centerY;
         
-        // Adjust pan to zoom towards cursor
-        setPanX(prevPanX => prevPanX - offsetX * (newScale / prevScale - 1));
-        setPanY(prevPanY => prevPanY - offsetY * (newScale / prevScale - 1));
+        // Adjust pan to zoom towards cursor (guard against division by zero)
+        if (prevScale > 0) {
+          setPanX(prevPanX => prevPanX - offsetX * (newScale / prevScale - 1));
+          setPanY(prevPanY => prevPanY - offsetY * (newScale / prevScale - 1));
+        }
         
         return newScale;
       });
@@ -124,9 +138,11 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
           setScale(prevScale => {
             const newScale = clampZoom(prevScale * zoomFactor);
             
-            // Adjust pan to zoom towards touch center
-            setPanX(prevPanX => prevPanX - offsetX * (newScale / prevScale - 1));
-            setPanY(prevPanY => prevPanY - offsetY * (newScale / prevScale - 1));
+            // Adjust pan to zoom towards touch center (guard against division by zero)
+            if (prevScale > 0) {
+              setPanX(prevPanX => prevPanX - offsetX * (newScale / prevScale - 1));
+              setPanY(prevPanY => prevPanY - offsetY * (newScale / prevScale - 1));
+            }
             
             return newScale;
           });
@@ -172,14 +188,10 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
 
   // マウスイベント
   const handleMouseDown = (e: React.MouseEvent) => {
-    if (scale > 1 && !e.currentTarget.classList.contains('cursor-ns-resize')) {
+    if (shouldEnablePan(e.currentTarget)) {
       // Pan mode when zoomed
       e.preventDefault();
-      setIsPanning(true);
-      panStartX.current = e.clientX;
-      panStartY.current = e.clientY;
-      panStartOffsetX.current = panX;
-      panStartOffsetY.current = panY;
+      startPanning(e.clientX, e.clientY);
     } else {
       // Resize mode
       e.preventDefault();
@@ -189,13 +201,9 @@ const Preview = ({ height, onHeightChange }: PreviewProps) => {
 
   // タッチイベント
   const handleTouchStart = (e: React.TouchEvent) => {
-    if (e.touches.length === 1 && scale > 1 && !e.currentTarget.classList.contains('cursor-ns-resize')) {
+    if (e.touches.length === 1 && shouldEnablePan(e.currentTarget)) {
       // Pan mode when zoomed with single touch
-      setIsPanning(true);
-      panStartX.current = e.touches[0].clientX;
-      panStartY.current = e.touches[0].clientY;
-      panStartOffsetX.current = panX;
-      panStartOffsetY.current = panY;
+      startPanning(e.touches[0].clientX, e.touches[0].clientY);
     } else if (e.touches.length === 1) {
       // Resize mode with single touch
       handleDragStart(e.touches[0].clientY);
