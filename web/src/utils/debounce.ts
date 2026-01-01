@@ -16,7 +16,6 @@ export function debounce<T extends (...args: any[]) => void>(func: T, wait: numb
 
     timeoutId = setTimeout(() => {
       func(...args);
-      timeoutId = null;
     }, wait);
   };
 }

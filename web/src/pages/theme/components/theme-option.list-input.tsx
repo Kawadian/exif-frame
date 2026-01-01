@@ -68,9 +68,9 @@ const ThemeOptionListInput = (props: ThemeOption) => {
                 type="color"
                 value={value as string}
                 onChange={(e) => {
-                  const newValue = e.target.value;
-                  Customize.set(selectedThemeName, props.id, newValue);
-                  setValue(newValue);
+                  const value = e.target.value;
+                  Customize.set(selectedThemeName, props.id, value);
+                  setValue(value);
                   debouncedRerender();
                 }}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
