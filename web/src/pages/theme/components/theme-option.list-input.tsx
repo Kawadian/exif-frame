@@ -1,12 +1,22 @@
 import { ListInput, ListItem, Range, Toggle } from 'konsta/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useStore } from '../../../store';
 import Customize from '../database/customize';
 import { ThemeOption, getConverter } from '../types/theme-option';
+import { debounce } from '../../../utils/debounce';
 
 const ThemeOptionListInput = (props: ThemeOption) => {
-  const { selectedThemeName, rerenderOptions, darkMode } = useStore();
+  const { selectedThemeName, rerenderOptions, darkMode, setRerenderOptions } = useStore();
   const [value, setValue] = useState(Customize.get(selectedThemeName, props.id, getConverter(props.type)) ?? props.default);
+
+  // Create a debounced version of setRerenderOptions
+  const debouncedRerender = useMemo(
+    () =>
+      debounce(() => {
+        setRerenderOptions();
+      }, 300),
+    [setRerenderOptions]
+  );
 
   useEffect(() => {
     setValue(Customize.get(selectedThemeName, props.id, getConverter(props.type)) ?? props.default);
@@ -61,6 +71,7 @@ const ThemeOptionListInput = (props: ThemeOption) => {
                   const newValue = e.target.value;
                   Customize.set(selectedThemeName, props.id, newValue);
                   setValue(newValue);
+                  debouncedRerender();
                 }}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
@@ -114,6 +125,7 @@ const ThemeOptionListInput = (props: ThemeOption) => {
                   const value = Number(e.target.value);
                   Customize.set(selectedThemeName, props.id, value);
                   setValue(value);
+                  debouncedRerender();
                 }}
               />
             </div>
