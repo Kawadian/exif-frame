@@ -184,7 +184,10 @@ const ThemeSettingsPage = () => {
 
     const input: ThemeOptionInput = new Map<string, string | number | boolean>();
     const currentTheme = themes.find((theme) => theme.name === selectedThemeName);
-    currentTheme?.options.forEach((option) => {
+    
+    if (!currentTheme || !currentTheme.func) return;
+    
+    currentTheme.options?.forEach((option) => {
       const value = Customize.get(selectedThemeName, option.id, getConverter(option.type));
       if (value !== null) {
         input.set(option.id, value);
@@ -193,9 +196,9 @@ const ThemeSettingsPage = () => {
       }
     });
 
-    const func = currentTheme?.func;
+    const func = currentTheme.func;
 
-    render(func!, photoToPreview, input, store).then((canvas) => {
+    render(func, photoToPreview, input, store).then((canvas) => {
       const ctx = preview.getContext('2d')!;
       const ratio = canvas.width / canvas.height;
       if (preview.width > preview.height) {
