@@ -1,6 +1,6 @@
 import { BlockTitle, List, Navbar, Page, Tabbar, TabbarLink } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { useStore } from '../../store';
 import SettingsIcon from '../../icons/settings.icon';
 import ImageIcon from '../../icons/image.icon';
@@ -39,6 +39,13 @@ const ThemeSettingsPage = () => {
       (category) => categorizedOptions[category].length > 0
     );
   }, [categorizedOptions]);
+
+  // Ensure customizeCategory is valid when categories change
+  useEffect(() => {
+    if (availableCategories.length > 0 && !availableCategories.includes(customizeCategory)) {
+      setCustomizeCategory(availableCategories[0]);
+    }
+  }, [availableCategories, customizeCategory]);
 
   return (
     <Page style={{ paddingBottom: '10rem' }}>

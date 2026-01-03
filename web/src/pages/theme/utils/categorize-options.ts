@@ -44,7 +44,7 @@ const categorizeOption = (option: ThemeOption): OptionCategory => {
     id.includes('DIVIDER') ||
     id.includes('LABEL') ||
     id === 'TEXT' ||
-    id.includes('_TEXT')
+    id.endsWith('_TEXT')
   ) {
     return 'text-content';
   }

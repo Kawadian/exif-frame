@@ -1,6 +1,7 @@
 import Photo from '../photo';
 
 export const MAX_SIZE = 4096; // Mobile Safari has a maximum canvas size of 4096x4096
+const BLUR_BACKGROUND_OVERLAY_OPACITY = 0.3; // Opacity for darkening the blurred background
 
 interface SandboxOptions {
   backgroundColor: string;
@@ -68,7 +69,7 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
       context.filter = 'none';
       
       // Add a semi-transparent overlay to darken the blurred background
-      context.fillStyle = 'rgba(0, 0, 0, 0.3)';
+      context.fillStyle = `rgba(0, 0, 0, ${BLUR_BACKGROUND_OVERLAY_OPACITY})`;
       context.fillRect(0, 0, canvas.width, canvas.height);
     } else {
       // Use solid color background
