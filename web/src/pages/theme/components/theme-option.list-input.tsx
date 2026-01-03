@@ -9,10 +9,11 @@ const ThemeOptionListInput = (props: ThemeOption) => {
   const { selectedThemeName, rerenderOptions, darkMode, setRerenderOptions } = useStore();
   const [value, setValue] = useState(Customize.get(selectedThemeName, props.id, getConverter(props.type)) ?? props.default);
 
-  // Create a debounced version of setRerenderOptions
-  const debouncedRerender = useMemo(
+  // Create a debounced function to save to localStorage and trigger re-render
+  const debouncedSaveAndRerender = useMemo(
     () =>
-      debounce(() => {
+      debounce((themeName: string, optionId: string, newValue: string | number | boolean) => {
+        Customize.set(themeName, optionId, newValue);
         setRerenderOptions();
       }, 300),
     [setRerenderOptions]
@@ -33,9 +34,9 @@ const ThemeOptionListInput = (props: ThemeOption) => {
           info={props.description}
           value={value}
           onChange={(e) => {
-            const value = e.target.value;
-            Customize.set(selectedThemeName, props.id, e.target.value);
-            setValue(value);
+            const newValue = e.target.value;
+            setValue(newValue);
+            debouncedSaveAndRerender(selectedThemeName, props.id, newValue);
           }}
         />
       )}
@@ -48,9 +49,9 @@ const ThemeOptionListInput = (props: ThemeOption) => {
           info={props.description}
           value={value}
           onChange={(e) => {
-            const value = e.target.value;
-            Customize.set(selectedThemeName, props.id, e.target.value);
-            setValue(value);
+            const newValue = e.target.value;
+            setValue(newValue);
+            debouncedSaveAndRerender(selectedThemeName, props.id, newValue);
           }}
         />
       )}
@@ -68,10 +69,9 @@ const ThemeOptionListInput = (props: ThemeOption) => {
                 type="color"
                 value={value as string}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  Customize.set(selectedThemeName, props.id, value);
-                  setValue(value);
-                  debouncedRerender();
+                  const newValue = e.target.value;
+                  setValue(newValue);
+                  debouncedSaveAndRerender(selectedThemeName, props.id, newValue);
                 }}
                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               />
@@ -79,9 +79,9 @@ const ThemeOptionListInput = (props: ThemeOption) => {
           }
           value={value}
           onChange={(e) => {
-            const value = e.target.value;
-            Customize.set(selectedThemeName, props.id, e.target.value);
-            setValue(value);
+            const newValue = e.target.value;
+            setValue(newValue);
+            debouncedSaveAndRerender(selectedThemeName, props.id, newValue);
           }}
         />
       )}
@@ -95,9 +95,9 @@ const ThemeOptionListInput = (props: ThemeOption) => {
           value={value}
           type="select"
           onChange={(e) => {
-            const value = e.target.value;
-            Customize.set(selectedThemeName, props.id, e.target.value);
-            setValue(value);
+            const newValue = e.target.value;
+            setValue(newValue);
+            debouncedSaveAndRerender(selectedThemeName, props.id, newValue);
           }}
           dropdown
         >
@@ -122,10 +122,9 @@ const ThemeOptionListInput = (props: ThemeOption) => {
                 max={props.max}
                 step={props.step}
                 onChange={(e) => {
-                  const value = Number(e.target.value);
-                  Customize.set(selectedThemeName, props.id, value);
-                  setValue(value);
-                  debouncedRerender();
+                  const newValue = Number(e.target.value);
+                  setValue(newValue);
+                  debouncedSaveAndRerender(selectedThemeName, props.id, newValue);
                 }}
               />
             </div>
@@ -143,8 +142,11 @@ const ThemeOptionListInput = (props: ThemeOption) => {
               key={props.id}
               checked={value as boolean}
               onChange={() => {
-                Customize.set(selectedThemeName, props.id, !value);
-                setValue(!value);
+                const newValue = !value;
+                setValue(newValue);
+                // Boolean toggles are immediate and don't need debouncing
+                Customize.set(selectedThemeName, props.id, newValue);
+                setRerenderOptions();
               }}
             />
           }
