@@ -1,7 +1,7 @@
-import { Button } from 'konsta/react';
 import { useStore } from '../../../store';
 import Photo from '../../../core/photo';
-import EyeIcon from '../../../icons/eye.icon';
+import { IoEyeOutline } from 'react-icons/io5';
+import { Button, Icon } from 'konsta/react';
 
 interface PreviewPhotoButtonProps {
   photo: Photo;
@@ -16,14 +16,16 @@ const PreviewPhotoButton = ({ photo }: PreviewPhotoButtonProps) => {
   };
 
   return (
+    <div className="w-10">
     <Button 
       inline 
-      className="w-9 h-9 flex items-center justify-center" 
+      className="k-color-brand-blue" 
       onClick={handleClick}
       colors={{ fillBgIos: isActive ? 'bg-blue-500' : 'bg-gray-200', fillBgMaterial: isActive ? 'bg-blue-500' : 'bg-gray-200' }}
     >
-      <EyeIcon size={18} />
+      <Icon ios={<IoEyeOutline className="w-5 h-5" />} />
     </Button>
+    </div>
   );
 };
 

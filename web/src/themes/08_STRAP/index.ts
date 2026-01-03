@@ -9,6 +9,8 @@ import { getCameraMakerLogo } from '../maker-logo';
 const STRAP_OPTIONS: ThemeOption[] = [
   { id: 'ARTIST', type: 'string', default: '', description: 'your name' },
   { id: 'DARK_MODE', type: 'boolean', default: false, description: 'enable to use dark mode' },
+  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
+  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
   { id: 'SECONDARY_TEXT_FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 - 900' },
   { id: 'PADDING_TOP', type: 'number', default: 0, description: 'px' },
   { id: 'PADDING_BOTTOM', type: 'number', default: 0, description: 'px' },
@@ -23,6 +25,8 @@ const STRAP_OPTIONS: ThemeOption[] = [
 const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
   const ARTIST = (input.get('ARTIST') as string).trim();
   const DARK_MODE = input.get('DARK_MODE') as boolean;
+  const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
+  const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
   const SECONDARY_TEXT_FONT_WEIGHT = input.get('SECONDARY_TEXT_FONT_WEIGHT') as number;
   const PADDING_TOP = input.get('PADDING_TOP') as number;
   const PADDING_BOTTOM = (input.get('PADDING_BOTTOM') as number) + 300;
@@ -110,6 +114,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
   });
   const context = canvas.getContext('2d')!;
   context.textBaseline = 'middle';
