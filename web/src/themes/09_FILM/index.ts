@@ -11,6 +11,8 @@ const FILM_OPTIONS: ThemeOption[] = [
   { id: 'TEXT_COLOR', type: 'color', default: '#FFA500', description: 'default is orange hex code' },
   { id: 'TEXT_ALPHA', type: 'range-slider', default: 1, min: 0, max: 1, step: 0.01, description: '0 - 1' },
   { id: 'BACKGROUND_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
+  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
+  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
   { id: 'PADDING_TOP', type: 'number', default: 0, description: 'px' },
   { id: 'PADDING_BOTTOM', type: 'number', default: 0, description: 'px' },
   { id: 'PADDING_LEFT', type: 'number', default: 0, description: 'px' },
@@ -24,6 +26,8 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
   const TEXT_COLOR = input.get('TEXT_COLOR') as string;
   const TEXT_ALPHA = input.get('TEXT_ALPHA') as number;
   const BACKGROUND_COLOR = (input.get('BACKGROUND_COLOR') as string).trim();
+  const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
+  const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
   const PADDING_TOP = input.get('PADDING_TOP') as number;
   const PADDING_BOTTOM = input.get('PADDING_BOTTOM') as number;
   const PADDING_LEFT = input.get('PADDING_LEFT') as number;
@@ -34,6 +38,7 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
   });
 
   const context = canvas.getContext('2d')!;

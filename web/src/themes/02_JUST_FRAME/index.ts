@@ -13,6 +13,8 @@ const JUST_FRAME_OPTIONS: ThemeOption[] = [
     description: 'Aspect ratio for the output image' 
   },
   { id: 'BACKGROUND_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
+  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
+  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
   { id: 'PADDING_TOP', type: 'number', default: 100, description: 'px' },
   { id: 'PADDING_BOTTOM', type: 'number', default: 100, description: 'px' },
   { id: 'PADDING_LEFT', type: 'number', default: 100, description: 'px' },
@@ -29,6 +31,8 @@ const JUST_FRAME_OPTIONS: ThemeOption[] = [
 const JUST_FRAME_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store) => {
   const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const BACKGROUND_COLOR = (input.get('BACKGROUND_COLOR') as string).trim();
+  const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
+  const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
   const PADDING_TOP = input.get('PADDING_TOP') as number;
   const PADDING_BOTTOM = input.get('PADDING_BOTTOM') as number;
   const PADDING_LEFT = input.get('PADDING_LEFT') as number;
@@ -54,6 +58,7 @@ const JUST_FRAME_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
       color: SHADOW_COLOR, 
       opacity: SHADOW_OPACITY 
     } : undefined,
+    blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
   });
 };
 

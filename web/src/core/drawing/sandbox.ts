@@ -1,6 +1,7 @@
 import Photo from '../photo';
 
 export const MAX_SIZE = 4096; // Mobile Safari has a maximum canvas size of 4096x4096
+const BLUR_BACKGROUND_OVERLAY_OPACITY = 0.3; // Opacity for darkening the blurred background
 
 interface SandboxOptions {
   backgroundColor: string;
@@ -9,6 +10,7 @@ interface SandboxOptions {
   notCroppedMode: boolean;
   photoBorder?: { width: number; color: string };
   shadow?: { offsetX: number; offsetY: number; blur: number; color: string; opacity: number };
+  blurBackground?: { amount: number };
 }
 
 // Note: Shadow and photo border effects are currently only applied in 'free' ratio mode
@@ -16,7 +18,7 @@ interface SandboxOptions {
 
 const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
   const { image } = photo;
-  const { backgroundColor, padding, targetRatio, notCroppedMode, photoBorder, shadow } = options;
+  const { backgroundColor, padding, targetRatio, notCroppedMode, photoBorder, shadow, blurBackground } = options;
   const { top, bottom, left, right } = padding;
 
   const canvas = document.createElement('canvas');
@@ -58,8 +60,22 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
     imgY = top;
 
     const context = canvas.getContext('2d')!;
-    context.fillStyle = backgroundColor;
-    context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Apply blurred background if enabled
+    if (blurBackground && blurBackground.amount > 0) {
+      // Draw blurred image as background
+      context.filter = `blur(${blurBackground.amount}px)`;
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      context.filter = 'none';
+      
+      // Add a semi-transparent overlay to darken the blurred background
+      context.fillStyle = `rgba(0, 0, 0, ${BLUR_BACKGROUND_OVERLAY_OPACITY})`;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    } else {
+      // Use solid color background
+      context.fillStyle = backgroundColor;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+    }
     
     // Apply shadow before drawing the image
     if (shadow && shadow.blur > 0) {

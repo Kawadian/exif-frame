@@ -25,7 +25,7 @@ export interface PreviewRef {
 
 const Preview = forwardRef<PreviewRef, PreviewProps>(({ height, onHeightChange }, ref) => {
   const store = useStore();
-  const { selectedThemeName, rerenderOptions, tabIndex } = useStore();
+  const { selectedThemeName, rerenderOptions, tabIndex, previewPhoto } = useStore();
   const [isDragging, setIsDragging] = useState(false);
   const [scale, setScale] = useState(1);
   const [panX, setPanX] = useState(0);
@@ -302,6 +302,9 @@ const Preview = forwardRef<PreviewRef, PreviewProps>(({ height, onHeightChange }
     if (store.photos.length === 0) return;
     if (tabIndex !== 1) return;
 
+    // Use previewPhoto if selected, otherwise use first photo
+    const photoToPreview = previewPhoto || store.photos[0];
+
     const input: ThemeOptionInput = new Map<string, string | number | boolean>();
     const theme = themes.find((theme) => theme.name === selectedThemeName);
     theme?.options.forEach((option) => {
@@ -315,7 +318,7 @@ const Preview = forwardRef<PreviewRef, PreviewProps>(({ height, onHeightChange }
 
     const func = theme?.func;
 
-    render(func!, store.photos[0], input, store).then((canvas) => {
+    render(func!, photoToPreview, input, store).then((canvas) => {
       const ctx = preview.getContext('2d')!;
       const ratio = canvas.width / canvas.height;
       if (preview.width > preview.height) {
@@ -330,7 +333,7 @@ const Preview = forwardRef<PreviewRef, PreviewProps>(({ height, onHeightChange }
       free(canvas);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedThemeName, rerenderOptions, tabIndex]);
+  }, [selectedThemeName, rerenderOptions, tabIndex, previewPhoto]);
 
   return (
     <div className="w-full flex flex-col items-center">

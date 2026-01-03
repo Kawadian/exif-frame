@@ -7,7 +7,7 @@ import AddIcon from '../../../icons/add.icon';
 
 const AddPhotoButton = () => {
   const { t } = useTranslation();
-  const { photos, setPhotos, setLoading, setOpenedAddPhotoErrorDialog } = useStore();
+  const { photos, setPhotos, setLoading, setOpenedAddPhotoErrorDialog, setPreviewPhoto } = useStore();
 
   const onDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -33,6 +33,9 @@ const AddPhotoButton = () => {
     try {
       await Promise.all(Array.from(files).map(Photo.create)).then((newPhotos) => {
         setPhotos([...photos, ...newPhotos]);
+        if (photos.length === 0 && newPhotos.length > 0) {
+          setPreviewPhoto(newPhotos[0]);
+        }
       });
     } catch (e) {
       console.error(e);
@@ -49,6 +52,9 @@ const AddPhotoButton = () => {
     try {
       await Promise.all(Array.from(files).map(Photo.create)).then((newPhotos) => {
         setPhotos([...photos, ...newPhotos]);
+        if (photos.length === 0 && newPhotos.length > 0) {
+          setPreviewPhoto(newPhotos[0]);
+        }
       });
     } catch (e) {
       console.error(e);
