@@ -27,9 +27,9 @@ const THREE_LINE_OPTIONS: ThemeOption[] = [
   { id: 'TOP_LABEL', type: 'string', default: '', description: 'ex. @username' },
   // Logo Settings
   { id: 'SHOW_LOGO', type: 'boolean', default: true, description: 'show camera maker logo' },
+  { id: 'LOGO_DARK_MODE', type: 'boolean', default: true, description: 'use dark mode (white) logo' },
   { id: 'LOGO_HEIGHT', type: 'number', default: 140, description: 'px' },
-  { id: 'LOGO_MAX_WIDTH', type: 'number', default: 560, description: 'px (max width for logo)' },
-  { id: 'LOGO_ALPHA', type: 'range-slider', default: 1, min: 0, max: 1, step: 0.01, description: '0 - 1' },
+  { id: 'LOGO_MAX_WIDTH', type: 'number', default: 400, description: 'px (max width for logo)' },
   // Line Settings
   { id: 'LINE_GAP', type: 'number', default: 0, description: 'px (gap between lines, 0 = auto)' },
   { id: 'DIVIDER', type: 'string', default: ' ', description: 'ex. | or ∙' },
@@ -58,9 +58,9 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
   const TOP_LABEL = (input.get('TOP_LABEL') as string).trim();
   // Logo Settings
   const SHOW_LOGO = input.get('SHOW_LOGO') as boolean;
+  const LOGO_DARK_MODE = input.get('LOGO_DARK_MODE') as boolean;
   const LOGO_HEIGHT = input.get('LOGO_HEIGHT') as number;
   const LOGO_MAX_WIDTH = input.get('LOGO_MAX_WIDTH') as number;
-  const LOGO_ALPHA = input.get('LOGO_ALPHA') as number;
   // Line Settings
   const LINE_GAP = input.get('LINE_GAP') as number;
   const DIVIDER = (input.get('DIVIDER') as string).trim();
@@ -90,6 +90,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
 
   const centerY = canvas.height - PADDING_BOTTOM / 2;
   const gapY = LINE_GAP > 0 ? LINE_GAP : FONT_SIZE * 1.15;
+  const logoBottomGap = FONT_SIZE * 0.5; // ロゴ下部の追加間隔
 
   // Top Label
   if (TOP_LABEL) {
@@ -100,8 +101,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
   // Logo
   const makeForLogo = overrideExifMetadata()?.make || photo.metadata.make;
   const modelForLogo = overrideExifMetadata()?.model || photo.metadata.model;
-  // Use dark mode logo as base (white logo) for tinting
-  const logo = SHOW_LOGO ? getCameraMakerLogo({ darkMode: true, make: makeForLogo, model: modelForLogo }) : null;
+  const logo = SHOW_LOGO ? getCameraMakerLogo({ darkMode: LOGO_DARK_MODE, make: makeForLogo, model: modelForLogo }) : null;
 
   if (logo) {
     const maxWidth = Math.min(LOGO_MAX_WIDTH, canvas.width - PADDING_LEFT - PADDING_RIGHT);
@@ -124,23 +124,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
       logoX = (canvas.width - drawWidth) / 2;
     }
 
-    // Create a temporary canvas to tint the logo with TEXT_COLOR
-    const logoCanvas = document.createElement('canvas');
-    logoCanvas.width = drawWidth;
-    logoCanvas.height = drawHeight;
-    const logoCtx = logoCanvas.getContext('2d')!;
-
-    // Draw the logo
-    logoCtx.drawImage(logo, 0, 0, drawWidth, drawHeight);
-
-    // Apply color tint using multiply blend mode
-    logoCtx.globalCompositeOperation = 'source-in';
-    logoCtx.fillStyle = TEXT_COLOR;
-    logoCtx.fillRect(0, 0, drawWidth, drawHeight);
-
-    context.globalAlpha = LOGO_ALPHA;
-    context.drawImage(logoCanvas, logoX, centerY - gapY - drawHeight / 2, drawWidth, drawHeight);
-    context.globalAlpha = TEXT_ALPHA;
+    context.drawImage(logo, logoX, centerY - gapY - logoBottomGap - drawHeight / 2, drawWidth, drawHeight);
   }
 
   // Line 1 (Body/Model text with template)
