@@ -14,7 +14,6 @@ import ImageIcon from '../../icons/image.icon';
 import GenerateIcon from '../../icons/generate.icon';
 import AddPhotoErrorDialog from './components/add-photo-error.dialog';
 import AddPhotoDragInDrop from './components/add-photo.drag-in-drop';
-import PreviewPhotoButton from './components/preview-photo.button';
 
 const FramePage = () => {
   const { t } = useTranslation();
@@ -48,7 +47,6 @@ const FramePage = () => {
             text={`${photo.metadata.make} ${photo.metadata.model} ${photo.metadata.lensModel}`}
             footer={
               <div className="flex space-x-1 mt-1">
-                <PreviewPhotoButton photo={photo} />
                 <OverrideMetadataButton photo={photo} />
                 <DownloadOnePhotoButton photo={photo} />
                 <RemoveOnePhotoButton index={index} />

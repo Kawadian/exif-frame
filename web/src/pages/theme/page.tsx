@@ -1,6 +1,6 @@
 import { BlockTitle, List, Navbar, Page, Tabbar, TabbarLink } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useStore } from '../../store';
 import SettingsIcon from '../../icons/settings.icon';
 import ImageIcon from '../../icons/image.icon';
@@ -13,39 +13,16 @@ import ThemeOptionResetButton from './components/theme-option-reset.button';
 import Preview, { DEFAULT_HEIGHT } from './components/preview';
 import type { PreviewRef } from './components/preview';
 import RerenderButton from './components/rerender.button';
-import { categorizeOptions, getCategoryLabel, type OptionCategory } from './utils/categorize-options';
 
 const ThemeSettingsPage = () => {
   const { t } = useTranslation();
   const { selectedThemeName, setTabIndex } = useStore();
   const theme = themes.find((theme) => theme.name === selectedThemeName);
   const [activeSubTab, setActiveSubTab] = useState<'list' | 'customize'>('list');
-  const [customizeCategory, setCustomizeCategory] = useState<OptionCategory>('frame');
   const [previewHeight, setPreviewHeight] = useState(DEFAULT_HEIGHT);
   const previewRef = useRef<PreviewRef>(null);
 
   const hasCustomizeOptions = theme?.options && theme.options.length > 0;
-
-  // Categorize options
-  const categorizedOptions = useMemo(() => {
-    if (!theme?.options) return null;
-    return categorizeOptions(theme.options);
-  }, [theme?.options]);
-
-  // Get available categories (only those with options)
-  const availableCategories = useMemo(() => {
-    if (!categorizedOptions) return [];
-    return (['frame', 'text-style', 'text-content', 'effects'] as OptionCategory[]).filter(
-      (category) => categorizedOptions[category].length > 0
-    );
-  }, [categorizedOptions]);
-
-  // Ensure customizeCategory is valid when categories change
-  useEffect(() => {
-    if (availableCategories.length > 0 && !availableCategories.includes(customizeCategory)) {
-      setCustomizeCategory(availableCategories[0]);
-    }
-  }, [availableCategories, customizeCategory]);
 
   return (
     <Page style={{ paddingBottom: '10rem' }}>
@@ -99,34 +76,14 @@ const ThemeSettingsPage = () => {
       {/* カスタマイズ */}
       {activeSubTab === 'customize' && hasCustomizeOptions && (
         <>
-          {/* カスタマイズ内のサブタブ */}
-          {availableCategories.length > 1 && (
-            <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-              {availableCategories.map((category) => (
-                <button
-                  key={category}
-                  className={`flex-1 py-2 text-sm font-medium transition-colors ${
-                    customizeCategory === category
-                      ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                  onClick={() => setCustomizeCategory(category)}
-                >
-                  {getCategoryLabel(category, t)}
-                </button>
-              ))}
-            </div>
-          )}
-
           <BlockTitle className="mt-4">
-            {availableCategories.length > 1 ? getCategoryLabel(customizeCategory, t) : t('root.themes.customize')}
+            {t('root.themes.customize')}
             <ThemeOptionResetButton />
           </BlockTitle>
           <List strongIos inset>
-            {categorizedOptions &&
-              categorizedOptions[customizeCategory].map((option, index) => {
-                return <ThemeOptionListInput {...option} key={index} />;
-              })}
+            {theme?.options.map((option, index) => {
+              return <ThemeOptionListInput {...option} key={index} />;
+            })}
           </List>
         </>
       )}

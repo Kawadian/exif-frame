@@ -35,7 +35,6 @@ type ColorOption = {
 type ThemeOption = (StringOption | NumberOption | BooleanOption | SelectOption | RangeSliderOption | ColorOption) & {
   id: string;
   description?: string;
-  category?: 'frame' | 'text-style' | 'text-content' | 'effects';
 };
 
 type ThemeOptionInput = Map<string, string | number | boolean>;

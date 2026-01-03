@@ -7,8 +7,6 @@ import Font from '../../fonts';
 
 const MONITOR_OPTIONS: ThemeOption[] = [
   { id: 'BACKGROUND_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
   { id: 'PADDING_INSIDE', type: 'boolean', default: false, description: 'enable to use inside padding' },
   { id: 'COMPACT', type: 'boolean', default: false, description: 'enable to reduce exif text width' },
   { id: 'PADDING_TOP', type: 'number', default: 0, description: 'px' },
@@ -24,8 +22,6 @@ const MONITOR_OPTIONS: ThemeOption[] = [
 
 const MONITOR_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
   const BACKGROUND_COLOR = (input.get('BACKGROUND_COLOR') as string).trim();
-  const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
-  const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
   const PADDING_INSIDE = input.get('PADDING_INSIDE') as boolean;
   const COMPACT = input.get('COMPACT') as boolean;
   const PADDING_TOP = input.get('PADDING_TOP') as number;
@@ -44,7 +40,6 @@ const MONITOR_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: S
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
-    blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
   });
 
   const context = canvas.getContext('2d')!;

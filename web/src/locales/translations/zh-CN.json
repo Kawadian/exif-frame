@@ -37,10 +37,6 @@
   "root.themes.preview": "预览",
   "root.themes.list": "列表",
   "root.themes.customize": "自定义",
-  "root.themes.customize.frame": "边框调整",
-  "root.themes.customize.text-style": "文本样式",
-  "root.themes.customize.text-content": "文本内容",
-  "root.themes.customize.effects": "效果",
 
   "root.successfully-downloaded-in-gallery": "已成功下载到图库",
 

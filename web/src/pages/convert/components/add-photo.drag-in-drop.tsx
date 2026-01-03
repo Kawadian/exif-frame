@@ -5,7 +5,7 @@ import DragInDropIcon from '../../../icons/drag-in-drop.icon';
 import { t } from 'i18next';
 
 const AddPhotoDragInDrop = () => {
-  const { photos, setPhotos, setLoading, setOpenedAddPhotoErrorDialog, darkMode, setPreviewPhoto } = useStore();
+  const { photos, setPhotos, setLoading, setOpenedAddPhotoErrorDialog, darkMode } = useStore();
 
   const onDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -31,9 +31,6 @@ const AddPhotoDragInDrop = () => {
     try {
       await Promise.all(Array.from(files).map(Photo.create)).then((newPhotos) => {
         setPhotos([...photos, ...newPhotos]);
-        if (photos.length === 0 && newPhotos.length > 0) {
-          setPreviewPhoto(newPhotos[0]);
-        }
       });
     } catch (e) {
       console.error(e);
@@ -50,9 +47,6 @@ const AddPhotoDragInDrop = () => {
     try {
       await Promise.all(Array.from(files).map(Photo.create)).then((newPhotos) => {
         setPhotos([...photos, ...newPhotos]);
-        if (photos.length === 0 && newPhotos.length > 0) {
-          setPreviewPhoto(newPhotos[0]);
-        }
       });
     } catch (e) {
       console.error(e);
