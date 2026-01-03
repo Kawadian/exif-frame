@@ -313,7 +313,7 @@ const ThemeSettingsPage = () => {
       
       <div className="flex" style={{ height: 'calc(100vh - env(safe-area-inset-top, 0px) - 4rem - 5rem)' }}>
         {/* Left side: Preview */}
-        <div className="flex-1 flex flex-col bg-gray-100 dark:bg-gray-900 overflow-hidden">
+        <div className="flex-1 flex flex-col bg-gray-300 dark:bg-gray-900 overflow-hidden">
           <div className="flex-1 flex items-center justify-center overflow-hidden">
             <canvas
               id="preview"
