@@ -6,8 +6,10 @@
 export const convertURLtoFile = async (url: string): Promise<File> => {
   const response = await fetch(url);
   const data = await response.blob();
-  const ext = url.split('.').pop() || 'png';
+  const ext = url.split('.').pop() || '';
   const filename = url.split('/').pop() || 'file';
-  const metadata = { type: `image/${ext}` };
+  
+  // Use the blob's actual MIME type if available, or construct from extension
+  const metadata = { type: data.type || (ext ? `image/${ext}` : 'application/octet-stream') };
   return new File([data], filename, metadata);
 };
