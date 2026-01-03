@@ -134,7 +134,7 @@ const useStore = create<Store>((set) => ({
   overrideMetadataIndexPopup: false,
   setOverrideMetadataIndexPopup: (opened: boolean) => set({ overrideMetadataIndexPopup: opened }),
 
-  overrideMetadataIndex: localStorage.getItem('overrideMetadataIndex') ? parseInt(localStorage.getItem('overrideMetadataIndex')!) : null,
+  overrideMetadataIndex: localStorage.getItem('overrideMetadataIndex') ? parseInt(localStorage.getItem('overrideMetadataIndex') || '0') : null,
   setOverrideMetadataIndex: (overrideMetadataIndex: number | null) =>
     set(() => {
       localStorage.setItem('overrideMetadataIndex', overrideMetadataIndex?.toString() || '');
@@ -164,7 +164,10 @@ const useStore = create<Store>((set) => ({
   darkMode: localStorage.getItem('darkMode') === 'true',
   setDarkMode: (darkMode: boolean) =>
     set(() => {
-      document.getElementById('theme')!.className = darkMode ? 'dark' : 'light';
+      const themeElement = document.getElementById('theme');
+      if (themeElement) {
+        themeElement.className = darkMode ? 'dark' : 'light';
+      }
       localStorage.setItem('darkMode', darkMode.toString());
       return { darkMode };
     }),
@@ -292,7 +295,7 @@ const useStore = create<Store>((set) => ({
       return { exportToJpeg };
     }),
 
-  maintainExif: localStorage.getItem('maintainExif') === 'true' || true,
+  maintainExif: localStorage.getItem('maintainExif') === 'true' || localStorage.getItem('maintainExif') === null,
   setMaintainExif: (maintainExif: boolean) =>
     set(() => {
       localStorage.setItem('maintainExif', maintainExif.toString());
@@ -359,7 +362,10 @@ const useStore = create<Store>((set) => ({
 }));
 
 // Set the theme on page load
-document.getElementById('theme')!.className = useStore.getState().darkMode ? 'dark' : 'light';
+const themeElement = document.getElementById('theme');
+if (themeElement) {
+  themeElement.className = useStore.getState().darkMode ? 'dark' : 'light';
+}
 
 export { useStore };
 
