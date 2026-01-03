@@ -146,6 +146,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
         .replace(/{F}/g, store.disableExposureMeter ? '' : photo.fNumber || '')
         .replace(/{SEC}/g, store.disableExposureMeter ? '' : photo.exposureTime || '')
         .replace(/{TAKEN_AT}/g, photo.takenAt || '')
+        .replace(/{LOGO}/g, '') // Remove {LOGO} placeholder from text
         .replace(/}/g, '')
     )
     .filter(Boolean)
@@ -169,6 +170,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
           .replace(/{F}/g, photo.fNumber || '')
           .replace(/{SEC}/g, photo.exposureTime || '')
           .replace(/{TAKEN_AT}/g, photo.takenAt || '')
+          .replace(/{LOGO}/g, '') // Remove {LOGO} placeholder from text
           .replace(/}/g, '')
       )
       .filter(Boolean)

@@ -53,6 +53,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
         .replace(/{F}/g, store.disableExposureMeter ? '' : photo.fNumber || '')
         .replace(/{SEC}/g, store.disableExposureMeter ? '' : photo.exposureTime || '')
         .replace(/{TAKEN_AT}/g, photo.takenAt || '')
+        .replace(/{LOGO}/g, '') // Remove {LOGO} placeholder from text
         .replace(/}/g, '')
     )
     .filter(Boolean)
@@ -70,6 +71,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
         .replace(/{F}/g, store.disableExposureMeter ? '' : photo.fNumber || '')
         .replace(/{SEC}/g, store.disableExposureMeter ? '' : photo.exposureTime || '')
         .replace(/{TAKEN_AT}/g, photo.takenAt || '')
+        .replace(/{LOGO}/g, '') // Remove {LOGO} placeholder from text
         .replace(/}/g, '')
     )
     .filter(Boolean)
@@ -87,6 +89,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
         .replace(/{F}/g, store.disableExposureMeter ? '' : photo.fNumber || '')
         .replace(/{SEC}/g, store.disableExposureMeter ? '' : photo.exposureTime || '')
         .replace(/{TAKEN_AT}/g, photo.takenAt || '')
+        .replace(/{LOGO}/g, '') // Remove {LOGO} placeholder from text
         .replace(/}/g, '')
     )
     .filter(Boolean)
@@ -104,6 +107,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
         .replace(/{F}/g, store.disableExposureMeter ? '' : photo.fNumber || '')
         .replace(/{SEC}/g, store.disableExposureMeter ? '' : photo.exposureTime || '')
         .replace(/{TAKEN_AT}/g, photo.takenAt || '')
+        .replace(/{LOGO}/g, '') // Remove {LOGO} placeholder from text
         .replace(/}/g, '')
     )
     .filter(Boolean)

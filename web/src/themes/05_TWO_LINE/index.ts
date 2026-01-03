@@ -5,6 +5,8 @@ import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import Font from '../../fonts';
 import { ASPECT_RATIO_OPTIONS } from '../../constants/aspect-ratios';
+import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
+import { getCameraMakerLogo } from '../maker-logo';
 
 const TWO_LINE_OPTIONS: ThemeOption[] = [
   { 
@@ -33,6 +35,10 @@ const TWO_LINE_OPTIONS: ThemeOption[] = [
   { id: 'DIVIDER', type: 'string', default: '∙', description: 'ex. |' },
   { id: 'TEMPLATE1', type: 'string', default: '{MAKER}{BODY}{LENS}' },
   { id: 'TEMPLATE2', type: 'string', default: '{ISO}{MM}{F}{SEC}' },
+  // Logo Settings
+  { id: 'LOGO_DARK_MODE', type: 'boolean', default: true, description: 'use dark mode (white) logo when using {LOGO}' },
+  { id: 'LOGO_HEIGHT', type: 'number', default: 50, description: 'px (logo height when using {LOGO})' },
+  { id: 'LOGO_MAX_WIDTH', type: 'number', default: 200, description: 'px (max width for logo when using {LOGO})' },
 ];
 
 const TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
@@ -57,6 +63,10 @@ const TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
   const DIVIDER = (input.get('DIVIDER') as string).trim();
   const TEMPLATE1 = (input.get('TEMPLATE1') as string).trim();
   const TEMPLATE2 = (input.get('TEMPLATE2') as string).trim();
+  // Logo Settings
+  const LOGO_DARK_MODE = input.get('LOGO_DARK_MODE') as boolean;
+  const LOGO_HEIGHT = input.get('LOGO_HEIGHT') as number;
+  const LOGO_MAX_WIDTH = input.get('LOGO_MAX_WIDTH') as number;
 
   const canvas = sandbox(photo, {
     targetRatio: ASPECT_RATIO === 'free' ? store.ratio : ASPECT_RATIO,
@@ -74,6 +84,15 @@ const TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
   context.globalAlpha = TEXT_ALPHA;
   context.fillText(TOP_LABEL, canvas.width / 2, PADDING_TOP / 2);
 
+  // Check if TEMPLATE1 contains {LOGO}
+  const hasLogo = TEMPLATE1.includes('{LOGO}');
+  let logo: HTMLImageElement | undefined;
+  if (hasLogo) {
+    const makeForLogo = overrideExifMetadata()?.make || photo.metadata.make;
+    const modelForLogo = overrideExifMetadata()?.model || photo.metadata.model;
+    logo = getCameraMakerLogo({ darkMode: LOGO_DARK_MODE, make: makeForLogo, model: modelForLogo });
+  }
+
   const text1 = TEMPLATE1.split('}')
     .map((part) => `${part}}`)
     .map((part) =>
@@ -86,13 +105,51 @@ const TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
         .replace(/{F}/g, store.disableExposureMeter ? '' : photo.fNumber || '')
         .replace(/{SEC}/g, store.disableExposureMeter ? '' : photo.exposureTime || '')
         .replace(/{TAKEN_AT}/g, photo.takenAt || '')
+        .replace(/{LOGO}/g, '') // Remove {LOGO} placeholder from text
         .replace(/}/g, '')
     )
     .filter(Boolean)
     .join(' ' + DIVIDER + ' ');
 
-  context.textAlign = TEXT_ALIGN as CanvasTextAlign;
-  context.fillText(text1, TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'center' ? canvas.width / 2 : canvas.width - PADDING_RIGHT, canvas.height - PADDING_BOTTOM / 2 - FONT_SIZE / 1.5);
+  const text1Y = canvas.height - PADDING_BOTTOM / 2 - FONT_SIZE / 1.5;
+  let text1X = TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'center' ? canvas.width / 2 : canvas.width - PADDING_RIGHT;
+
+  // Draw logo if present for first line
+  if (logo && hasLogo) {
+    const maxWidth = Math.min(LOGO_MAX_WIDTH, canvas.width - PADDING_LEFT - PADDING_RIGHT);
+    let drawHeight = LOGO_HEIGHT;
+    let drawWidth = (logo.width / logo.height) * drawHeight;
+
+    if (drawWidth > maxWidth) {
+      drawWidth = maxWidth;
+      drawHeight = (logo.height / logo.width) * drawWidth;
+    }
+
+    const textWidth = context.measureText(text1).width;
+    const totalWidth = textWidth + (text1 ? drawWidth + 20 : drawWidth); // 20px spacing
+
+    let logoX: number;
+    if (TEXT_ALIGN === 'left') {
+      logoX = PADDING_LEFT;
+      text1X = logoX + drawWidth + (text1 ? 20 : 0);
+    } else if (TEXT_ALIGN === 'right') {
+      logoX = canvas.width - PADDING_RIGHT - drawWidth;
+      text1X = canvas.width - PADDING_RIGHT - drawWidth - (text1 ? 20 : 0);
+      context.textAlign = 'right';
+    } else { // center
+      logoX = (canvas.width - totalWidth) / 2;
+      text1X = logoX + drawWidth + (text1 ? 20 : 0);
+      context.textAlign = 'left';
+    }
+
+    context.drawImage(logo, logoX, text1Y - drawHeight / 2, drawWidth, drawHeight);
+  } else {
+    context.textAlign = TEXT_ALIGN as CanvasTextAlign;
+  }
+
+  if (text1) {
+    context.fillText(text1, text1X, text1Y);
+  }
 
   if (!store.disableExposureMeter) {
     const text2 = TEMPLATE2.split('}')
@@ -107,11 +164,13 @@ const TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
           .replace(/{F}/g, store.disableExposureMeter ? '' : photo.fNumber || '')
           .replace(/{SEC}/g, store.disableExposureMeter ? '' : photo.exposureTime || '')
           .replace(/{TAKEN_AT}/g, photo.takenAt || '')
+          .replace(/{LOGO}/g, '') // Remove {LOGO} placeholder from text
           .replace(/}/g, '')
       )
       .filter(Boolean)
       .join(' ' + DIVIDER + ' ');
 
+    context.textAlign = TEXT_ALIGN as CanvasTextAlign;
     context.fillText(text2, TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'center' ? canvas.width / 2 : canvas.width - PADDING_RIGHT, canvas.height - PADDING_BOTTOM / 2 + FONT_SIZE / 1.5);
   }
 
