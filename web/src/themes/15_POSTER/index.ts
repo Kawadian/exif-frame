@@ -12,6 +12,13 @@ const POSTER_OPTIONS: ThemeOption[] = [
   CommonOptions.createPaddingTopOption(400),
   CommonOptions.createPaddingBottomOption(400),
   CommonOptions.createPaddingLeftOption(150),
+  CommonOptions.createPhotoBorderWidthOption(0),
+  CommonOptions.createPhotoBorderColorOption('#000000'),
+  CommonOptions.createShadowOffsetXOption(0),
+  CommonOptions.createShadowOffsetYOption(0),
+  CommonOptions.createShadowBlurOption(0),
+  CommonOptions.createShadowColorOption('#000000'),
+  CommonOptions.createShadowOpacityOption(0.5),
   CommonOptions.createText1Option('2001.01.01'),
   CommonOptions.createText2Option('Lorem Ipsum'),
   CommonOptions.createText3Option('dolor sit amet, consectetur'),
@@ -38,6 +45,13 @@ const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: St
   const PADDING_TOP = input.get('PADDING_TOP') as number;
   const PADDING_BOTTOM = input.get('PADDING_BOTTOM') as number;
   const PADDING_LEFT = input.get('PADDING_LEFT') as number;
+  const PHOTO_BORDER_WIDTH = input.get('PHOTO_BORDER_WIDTH') as number;
+  const PHOTO_BORDER_COLOR = (input.get('PHOTO_BORDER_COLOR') as string).trim();
+  const SHADOW_OFFSET_X = input.get('SHADOW_OFFSET_X') as number;
+  const SHADOW_OFFSET_Y = input.get('SHADOW_OFFSET_Y') as number;
+  const SHADOW_BLUR = input.get('SHADOW_BLUR') as number;
+  const SHADOW_COLOR = (input.get('SHADOW_COLOR') as string).trim();
+  const SHADOW_OPACITY = input.get('SHADOW_OPACITY') as number;
   const TEXT1 = (input.get('TEXT1') as string).trim();
   const TEXT2 = (input.get('TEXT2') as string).trim();
   const TEXT3 = (input.get('TEXT3') as string).trim();
@@ -63,6 +77,8 @@ const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: St
     backgroundColor: DARK_MODE ? '#ffffff' : '#000000',
     padding: { top: 0, right: 0, bottom: 0, left: 0 },
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
+    photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
+    shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
 
   const context = canvas.getContext('2d')!;

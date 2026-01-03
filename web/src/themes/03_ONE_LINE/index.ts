@@ -17,6 +17,13 @@ const ONE_LINE_OPTIONS: ThemeOption[] = [
   CommonOptions.createPaddingBottomOption(250),
   CommonOptions.createPaddingLeftOption(100),
   CommonOptions.createPaddingRightOption(100),
+  CommonOptions.createPhotoBorderWidthOption(0),
+  CommonOptions.createPhotoBorderColorOption('#000000'),
+  CommonOptions.createShadowOffsetXOption(0),
+  CommonOptions.createShadowOffsetYOption(0),
+  CommonOptions.createShadowBlurOption(0),
+  CommonOptions.createShadowColorOption('#000000'),
+  CommonOptions.createShadowOpacityOption(0.5),
   CommonOptions.createTextColorOption('#000000'),
   CommonOptions.createTextAlphaOption(1),
   CommonOptions.createTextAlignOption('center'),
@@ -42,6 +49,13 @@ const ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
   const PADDING_BOTTOM = input.get('PADDING_BOTTOM') as number;
   const PADDING_LEFT = input.get('PADDING_LEFT') as number;
   const PADDING_RIGHT = input.get('PADDING_RIGHT') as number;
+  const PHOTO_BORDER_WIDTH = input.get('PHOTO_BORDER_WIDTH') as number;
+  const PHOTO_BORDER_COLOR = (input.get('PHOTO_BORDER_COLOR') as string).trim();
+  const SHADOW_OFFSET_X = input.get('SHADOW_OFFSET_X') as number;
+  const SHADOW_OFFSET_Y = input.get('SHADOW_OFFSET_Y') as number;
+  const SHADOW_BLUR = input.get('SHADOW_BLUR') as number;
+  const SHADOW_COLOR = (input.get('SHADOW_COLOR') as string).trim();
+  const SHADOW_OPACITY = input.get('SHADOW_OPACITY') as number;
   const TEXT_COLOR = input.get('TEXT_COLOR') as string;
   const TEXT_ALPHA = input.get('TEXT_ALPHA') as number;
   const TEXT_ALIGN = (input.get('TEXT_ALIGN') as string).trim() as CanvasTextAlign;
@@ -63,6 +77,8 @@ const ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
     backgroundColor: BACKGROUND_COLOR,
     padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
+    photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
+    shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
 
   const context = canvas.getContext('2d')!;
