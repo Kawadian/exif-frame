@@ -134,7 +134,10 @@ const useStore = create<Store>((set) => ({
   overrideMetadataIndexPopup: false,
   setOverrideMetadataIndexPopup: (opened: boolean) => set({ overrideMetadataIndexPopup: opened }),
 
-  overrideMetadataIndex: localStorage.getItem('overrideMetadataIndex') ? parseInt(localStorage.getItem('overrideMetadataIndex') || '0') : null,
+  overrideMetadataIndex: (() => {
+    const value = localStorage.getItem('overrideMetadataIndex');
+    return value ? parseInt(value, 10) : null;
+  })(),
   setOverrideMetadataIndex: (overrideMetadataIndex: number | null) =>
     set(() => {
       localStorage.setItem('overrideMetadataIndex', overrideMetadataIndex?.toString() || '');
