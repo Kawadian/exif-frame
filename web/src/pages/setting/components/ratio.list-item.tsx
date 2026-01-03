@@ -10,20 +10,18 @@ const RatioListItem = () => {
   return (
     <>
       <ListItem media={<ImageWidthIcon size={26} />} title={t('root.settings.ratio')} after={<div className="ratio-name">{ratio}</div>} onClick={() => setRatioPopover(true)} link />
-      {ratio !== 'free' && (
-        <ListItem
-          media={<ImageWidthIcon size={26} />}
-          title={t('root.settings.not-cropped-mode')}
-          after={
-            <Toggle
-              checked={notCroppedMode}
-              onChange={() => {
-                setNotCroppedMode(!notCroppedMode);
-              }}
-            />
-          }
-        />
-      )}
+      <ListItem
+        media={<ImageWidthIcon size={26} />}
+        title={t('root.settings.not-cropped-mode')}
+        after={
+          <Toggle
+            checked={notCroppedMode}
+            onChange={() => {
+              setNotCroppedMode(!notCroppedMode);
+            }}
+          />
+        }
+      />
     </>
   );
 };

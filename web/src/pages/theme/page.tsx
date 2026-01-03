@@ -9,22 +9,207 @@ import PanelLeftIcon from '../../icons/panel-left.icon';
 import themes from '../../themes';
 import ThemeListItem from './components/theme.list-item';
 import ThemeOptionListInput from './components/theme-option.list-input';
+import NotCroppedModeListItem from './components/not-cropped-mode.list-item';
 import Loading from '../convert/components/loading';
 import ThemeOptionResetButton from './components/theme-option-reset.button';
 import Preview, { DEFAULT_HEIGHT } from './components/preview';
 import type { PreviewRef } from './components/preview';
 import RerenderButton from './components/rerender.button';
+import render from '../../core/drawing/render';
+import { ThemeOptionInput, getConverter } from './types/theme-option';
+import Customize from './database/customize';
+import free from '../../core/drawing/free';
+
+const MIN_ZOOM = 0.5;
+const MAX_ZOOM = 3;
 
 const ThemeSettingsPage = () => {
   const { t } = useTranslation();
-  const { selectedThemeName, setTabIndex, drawerOpen, setDrawerOpen } = useStore();
+  const { selectedThemeName, setTabIndex, drawerOpen, setDrawerOpen, rerenderOptions, tabIndex, previewPhoto, photos } = useStore();
   const theme = themes.find((theme) => theme.name === selectedThemeName);
   const [activeSubTab, setActiveSubTab] = useState<'list' | 'customize'>('list');
   const [previewHeight, setPreviewHeight] = useState(DEFAULT_HEIGHT);
   const [isMobile, setIsMobile] = useState(false);
   const previewRef = useRef<PreviewRef>(null);
+  
+  // Desktop preview states
+  const [scale, setScale] = useState(1);
+  const [panX, setPanX] = useState(0);
+  const [panY, setPanY] = useState(0);
+  const [isPanning, setIsPanning] = useState(false);
+  const panStartX = useRef(0);
+  const panStartY = useRef(0);
+  const panStartOffsetX = useRef(0);
+  const panStartOffsetY = useRef(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const hasCustomizeOptions = theme?.options && theme.options.length > 0;
+
+  // Desktop preview zoom and pan handlers
+  const clampZoom = (value: number) => Math.min(Math.max(MIN_ZOOM, value), MAX_ZOOM);
+
+  const resetZoom = () => {
+    setScale(1);
+    setPanX(0);
+    setPanY(0);
+  };
+
+  const startPanning = (clientX: number, clientY: number) => {
+    setIsPanning(true);
+    panStartX.current = clientX;
+    panStartY.current = clientY;
+    panStartOffsetX.current = panX;
+    panStartOffsetY.current = panY;
+  };
+
+  const handleCanvasMouseDown = (e: React.MouseEvent) => {
+    if (scale > 1) {
+      e.preventDefault();
+      startPanning(e.clientX, e.clientY);
+    }
+  };
+
+  const handleCanvasTouchStart = (e: React.TouchEvent) => {
+    if (e.touches.length === 1 && scale > 1) {
+      e.preventDefault();
+      startPanning(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  };
+
+  // Handle mouse/touch move and up for panning
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (isPanning) {
+        const deltaX = e.clientX - panStartX.current;
+        const deltaY = e.clientY - panStartY.current;
+        setPanX(panStartOffsetX.current + deltaX);
+        setPanY(panStartOffsetY.current + deltaY);
+      }
+    };
+
+    const handleMouseUp = () => {
+      setIsPanning(false);
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 1 && isPanning) {
+        e.preventDefault();
+        const deltaX = e.touches[0].clientX - panStartX.current;
+        const deltaY = e.touches[0].clientY - panStartY.current;
+        setPanX(panStartOffsetX.current + deltaX);
+        setPanY(panStartOffsetY.current + deltaY);
+      }
+    };
+
+    const handleTouchEnd = () => {
+      setIsPanning(false);
+    };
+
+    if (isPanning) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    };
+  }, [isPanning]);
+
+  // Handle wheel zoom for desktop
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || isMobile) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const mouseX = e.clientX - rect.left;
+        const mouseY = e.clientY - rect.top;
+
+        const delta = -e.deltaY;
+        const zoomFactor = delta > 0 ? 1.1 : 0.9;
+
+        setScale((prevScale) => {
+          const newScale = clampZoom(prevScale * zoomFactor);
+
+          // Calculate zoom origin relative to canvas center
+          const centerX = rect.width / 2;
+          const centerY = rect.height / 2;
+          const offsetX = mouseX - centerX;
+          const offsetY = mouseY - centerY;
+
+          // Adjust pan to zoom towards cursor
+          if (prevScale > 0) {
+            setPanX((prevPanX) => prevPanX - offsetX * (newScale / prevScale - 1));
+            setPanY((prevPanY) => prevPanY - offsetY * (newScale / prevScale - 1));
+          }
+
+          return newScale;
+        });
+      }
+    };
+
+    canvas.addEventListener('wheel', handleWheel, { passive: false });
+    return () => canvas.removeEventListener('wheel', handleWheel);
+  }, [isMobile]);
+
+  // Reset pan when scale is 1
+  useEffect(() => {
+    if (scale === 1) {
+      setPanX(0);
+      setPanY(0);
+    }
+  }, [scale]);
+
+  // Render canvas for desktop preview
+  useEffect(() => {
+    if (isMobile || !canvasRef.current) return;
+    
+    const preview = canvasRef.current;
+    const store = useStore.getState();
+    
+    preview.width = 0;
+    preview.height = 0;
+
+    if (store.photos.length === 0) return;
+    if (tabIndex !== 1) return;
+
+    const photoToPreview = previewPhoto || store.photos[0];
+
+    const input: ThemeOptionInput = new Map<string, string | number | boolean>();
+    const currentTheme = themes.find((theme) => theme.name === selectedThemeName);
+    currentTheme?.options.forEach((option) => {
+      const value = Customize.get(selectedThemeName, option.id, getConverter(option.type));
+      if (value !== null) {
+        input.set(option.id, value);
+      } else {
+        input.set(option.id, option.default);
+      }
+    });
+
+    const func = currentTheme?.func;
+
+    render(func!, photoToPreview, input, store).then((canvas) => {
+      const ctx = preview.getContext('2d')!;
+      const ratio = canvas.width / canvas.height;
+      if (preview.width > preview.height) {
+        preview.width = 4000;
+        preview.height = 4000 / ratio;
+      } else {
+        preview.height = 4000;
+        preview.width = 4000 * ratio;
+      }
+      ctx.clearRect(0, 0, preview.width, preview.height);
+      ctx.drawImage(canvas, 0, 0, preview.width, preview.height);
+      free(canvas);
+    });
+  }, [selectedThemeName, rerenderOptions, tabIndex, previewPhoto, photos, isMobile]);
 
   useEffect(() => {
     // Initialize isMobile state
@@ -100,6 +285,7 @@ const ThemeSettingsPage = () => {
               {theme?.options.map((option, index) => {
                 return <ThemeOptionListInput {...option} key={index} />;
               })}
+              <NotCroppedModeListItem />
             </List>
           </>
         )}
@@ -120,15 +306,27 @@ const ThemeSettingsPage = () => {
     <Page>
       <Navbar large transparent title={t('root.themes')} />
       
-      <div className="flex h-screen" style={{ paddingTop: 'calc(env(safe-area-inset-top, 0px) + 4rem)', paddingBottom: '5rem' }}>
+      <div className="flex" style={{ height: 'calc(100vh - env(safe-area-inset-top, 0px) - 4rem - 5rem)' }}>
         {/* Left side: Preview */}
         <div className="flex-1 flex flex-col bg-gray-100 dark:bg-gray-900 overflow-hidden">
-          <div className="flex-1 flex items-center justify-center p-4 overflow-hidden">
-            <Preview ref={previewRef} height={previewHeight} onHeightChange={setPreviewHeight} />
+          <div className="flex-1 flex items-center justify-center overflow-hidden">
+            <canvas
+              id="preview"
+              ref={canvasRef}
+              className="max-w-full max-h-full object-contain"
+              style={{
+                transform: `translate(${panX}px, ${panY}px) scale(${scale})`,
+                transformOrigin: 'center center',
+                transition: isPanning ? 'none' : 'transform 0.1s ease-out',
+                cursor: scale > 1 ? (isPanning ? 'grabbing' : 'grab') : 'default',
+              }}
+              onMouseDown={handleCanvasMouseDown}
+              onTouchStart={handleCanvasTouchStart}
+            />
           </div>
-          <div className="flex justify-center pb-4 gap-2">
+          <div className="flex justify-center py-3 gap-2 bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
             <RerenderButton />
-            <RerenderButton isZoomReset onClick={() => previewRef.current?.resetZoom()} />
+            <RerenderButton isZoomReset onClick={resetZoom} />
           </div>
         </div>
 
@@ -188,6 +386,7 @@ const ThemeSettingsPage = () => {
                     {theme?.options.map((option, index) => {
                       return <ThemeOptionListInput {...option} key={index} />;
                     })}
+                    <NotCroppedModeListItem />
                   </List>
                 </>
               )}
