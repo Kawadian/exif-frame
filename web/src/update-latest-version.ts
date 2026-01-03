@@ -18,8 +18,9 @@ async function updateLatestVersion(): Promise<void> {
       // Hide splash screen when the latest version is not greater than the current version.
       await SplashScreen.hide();
     }
-  } catch (e) {
-    // Do nothing when failed to update.
+  } catch (error) {
+    // Hide splash screen and log error when update fails
+    console.error('Failed to update app version:', error);
     await SplashScreen.hide();
   }
 

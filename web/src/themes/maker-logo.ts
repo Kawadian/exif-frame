@@ -55,33 +55,40 @@ const includesAny = (haystack: string, ...needles: string[]): boolean => {
   return needles.some((needle) => haystack.includes(needle));
 };
 
+// Map of brand keywords to logo keys
+const BRAND_KEYWORDS: Record<string, string[]> = {
+  APPLE: ['APPLE'],
+  CANON: ['CANON'],
+  CONTAX: ['CONTAX'],
+  DJI: ['DJI'],
+  EPSON: ['EPSON'],
+  FUJI: ['FUJI'],
+  GOLDSTAR: ['GOLDSTAR'],
+  HASSELBLAD: ['HASSELBLAD'],
+  LEICA: ['LEICA'],
+  LG: ['LG'],
+  MAMIYA: ['MAMIYA'],
+  NIKON: ['NIKON'],
+  OLYMPUS: ['OLYMPUS'],
+  OM: ['OM'],
+  PANASONIC: ['PANASONIC'],
+  PHASEONE: ['PHASE'],
+  PENTAX: ['PENTAX'],
+  RICOH: ['RICOH'],
+  SIGMA: ['SIGMA'],
+  SONY: ['SONY'],
+  SAMSUNG: ['SAMSUNG'],
+};
+
 const pickLogoKey = (make?: string, model?: string): string | null => {
   const makeUpper = normalize(make);
   const modelUpper = normalize(model);
 
-  if (includesAny(makeUpper, 'APPLE') || includesAny(modelUpper, 'APPLE')) return 'APPLE';
-  if (includesAny(makeUpper, 'CANON') || includesAny(modelUpper, 'CANON')) return 'CANON';
-  if (includesAny(makeUpper, 'CONTAX') || includesAny(modelUpper, 'CONTAX')) return 'CONTAX';
-  if (includesAny(makeUpper, 'DJI') || includesAny(modelUpper, 'DJI')) return 'DJI';
-  if (includesAny(makeUpper, 'EPSON') || includesAny(modelUpper, 'EPSON')) return 'EPSON';
-  if (includesAny(makeUpper, 'FUJI') || includesAny(modelUpper, 'FUJI')) return 'FUJI';
-  if (includesAny(makeUpper, 'GOLDSTAR') || includesAny(modelUpper, 'GOLDSTAR')) return 'GOLDSTAR';
-  if (includesAny(makeUpper, 'HASSELBLAD') || includesAny(modelUpper, 'HASSELBLAD')) return 'HASSELBLAD';
-  if (includesAny(makeUpper, 'LEICA') || includesAny(modelUpper, 'LEICA')) return 'LEICA';
-  if (includesAny(makeUpper, 'LG') || includesAny(modelUpper, 'LG')) return 'LG';
-  if (includesAny(makeUpper, 'MAMIYA') || includesAny(modelUpper, 'MAMIYA')) return 'MAMIYA';
-  if (includesAny(makeUpper, 'NIKON') || includesAny(modelUpper, 'NIKON')) return 'NIKON';
-  if (includesAny(makeUpper, 'OLYMPUS') || includesAny(modelUpper, 'OLYMPUS')) return 'OLYMPUS';
-  if (includesAny(makeUpper, 'OM') || includesAny(modelUpper, 'OM')) return 'OM';
-  if (includesAny(makeUpper, 'PANASONIC') || includesAny(modelUpper, 'PANASONIC')) return 'PANASONIC';
-  if (includesAny(makeUpper, 'PHASE') || includesAny(modelUpper, 'PHASE')) return 'PHASEONE';
-  if (includesAny(makeUpper, 'PENTAX') || includesAny(modelUpper, 'PENTAX')) return 'PENTAX';
-
-  if (includesAny(makeUpper, 'RICO') || includesAny(modelUpper, 'RICO')) return 'RICOH';
-
-  if (includesAny(makeUpper, 'SIGMA') || includesAny(modelUpper, 'SIGMA')) return 'SIGMA';
-  if (includesAny(makeUpper, 'SONY') || includesAny(modelUpper, 'SONY')) return 'SONY';
-  if (includesAny(makeUpper, 'SAMSUNG') || includesAny(modelUpper, 'SAMSUNG')) return 'SAMSUNG';
+  for (const [logoKey, keywords] of Object.entries(BRAND_KEYWORDS)) {
+    if (includesAny(makeUpper, ...keywords) || includesAny(modelUpper, ...keywords)) {
+      return logoKey;
+    }
+  }
 
   return null;
 };
