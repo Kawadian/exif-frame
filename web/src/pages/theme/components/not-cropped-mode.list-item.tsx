@@ -5,7 +5,7 @@ import ImageWidthIcon from '../../../icons/image-width.icon';
 
 const NotCroppedModeListItem = () => {
   const { t } = useTranslation();
-  const { notCroppedMode, setNotCroppedMode } = useStore();
+  const { notCroppedMode, setNotCroppedMode, setRerenderOptions } = useStore();
 
   return (
     <ListItem
@@ -16,6 +16,7 @@ const NotCroppedModeListItem = () => {
           checked={notCroppedMode}
           onChange={() => {
             setNotCroppedMode(!notCroppedMode);
+            setRerenderOptions();
           }}
         />
       }
