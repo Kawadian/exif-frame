@@ -199,7 +199,9 @@ const ThemeSettingsPage = () => {
     const func = currentTheme.func;
 
     render(func, photoToPreview, input, store).then((canvas) => {
-      const ctx = preview.getContext('2d')!;
+      const ctx = preview.getContext('2d');
+      if (!ctx) return;
+      
       const ratio = canvas.width / canvas.height;
       if (preview.width > preview.height) {
         preview.width = 4000;
