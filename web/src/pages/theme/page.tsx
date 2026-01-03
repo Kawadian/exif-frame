@@ -21,12 +21,15 @@ const ThemeSettingsPage = () => {
   const theme = themes.find((theme) => theme.name === selectedThemeName);
   const [activeSubTab, setActiveSubTab] = useState<'list' | 'customize'>('list');
   const [previewHeight, setPreviewHeight] = useState(DEFAULT_HEIGHT);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(false);
   const previewRef = useRef<PreviewRef>(null);
 
   const hasCustomizeOptions = theme?.options && theme.options.length > 0;
 
   useEffect(() => {
+    // Initialize isMobile state
+    setIsMobile(window.innerWidth < 768);
+
     const handleResize = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -194,7 +197,7 @@ const ThemeSettingsPage = () => {
 
         {/* Drawer toggle button */}
         <button
-          className={`absolute right-${drawerOpen ? '96' : '0'} top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-l-lg shadow-lg transition-all duration-300 z-50`}
+          className="absolute top-1/2 transform -translate-y-1/2 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-l-lg shadow-lg transition-all duration-300 z-50"
           onClick={() => setDrawerOpen(!drawerOpen)}
           style={{
             right: drawerOpen ? '24rem' : '0',
