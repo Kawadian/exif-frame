@@ -7,6 +7,8 @@ import Font from '../../fonts';
 
 const TIP_OPTIONS: ThemeOption[] = [
   { id: 'DARK_MODE', type: 'boolean', default: false, description: 'enable to use dark mode' },
+  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
+  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
   { id: 'HIDE_TEXT', type: 'boolean', default: false, description: 'hide text' },
   { id: 'TAG', type: 'string', default: 'TIP' },
   { id: 'TITLE', type: 'string', default: '01. Lorem ipsum' },
@@ -28,6 +30,8 @@ const TIP_OPTIONS: ThemeOption[] = [
 
 const TIP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
   const DARK_MODE = input.get('DARK_MODE') as boolean;
+  const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
+  const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
   const HIDE_TEXT = input.get('HIDE_TEXT') as boolean;
   const TAG = (input.get('TAG') as string).trim();
   const TITLE = (input.get('TITLE') as string).trim();
@@ -52,6 +56,7 @@ const TIP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store
     notCroppedMode: store.notCroppedMode,
     backgroundColor: DARK_MODE ? '#ffffff' : '#000000',
     padding: { top: 0, right: 0, bottom: 0, left: 0 },
+    blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
   });
 
   const context = canvas.getContext('2d')!;
