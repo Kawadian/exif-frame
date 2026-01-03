@@ -3,33 +3,26 @@ import { Store } from '../../store';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
-import Font from '../../fonts';
-import { ASPECT_RATIO_OPTIONS } from '../../constants/aspect-ratios';
+import * as CommonOptions from '../common-options';
 
 const SIMPLE_OPTIONS: ThemeOption[] = [
-  { 
-    id: 'ASPECT_RATIO', 
-    type: 'select', 
-    options: ASPECT_RATIO_OPTIONS,
-    default: 'free', 
-    description: 'Aspect ratio for the output image' 
-  },
-  { id: 'LABEL', type: 'string', default: '@username', description: 'ex. @username' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'PADDING_INSIDE', type: 'boolean', default: false, description: 'enable to use inside padding' },
-  { id: 'PADDING_TOP', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 400, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 100, description: 'px' },
-  { id: 'PHOTO_BORDER_WIDTH', type: 'number', default: 0, description: 'px' },
-  { id: 'PHOTO_BORDER_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
-  { id: 'SHADOW_OFFSET_X', type: 'number', default: 0, description: 'px, positive = right, negative = left' },
-  { id: 'SHADOW_OFFSET_Y', type: 'number', default: 0, description: 'px, positive = down, negative = up' },
-  { id: 'SHADOW_BLUR', type: 'number', default: 0, description: 'px, 0 = no shadow' },
-  { id: 'SHADOW_COLOR', type: 'color', default: '#000000', description: 'shadow color' },
-  { id: 'SHADOW_OPACITY', type: 'range-slider', default: 0.5, min: 0, max: 1, step: 0.01, description: '0 - 1' },
+  CommonOptions.createAspectRatioOption(),
+  CommonOptions.createLabelOption('@username'),
+  CommonOptions.createFontFamilyOption('Barlow'),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createPaddingInsideOption(false),
+  CommonOptions.createPaddingTopOption(100),
+  CommonOptions.createPaddingBottomOption(400),
+  CommonOptions.createPaddingLeftOption(100),
+  CommonOptions.createPaddingRightOption(100),
+  CommonOptions.createPhotoBorderWidthOption(0),
+  CommonOptions.createPhotoBorderColorOption('#000000'),
+  CommonOptions.createShadowOffsetXOption(0),
+  CommonOptions.createShadowOffsetYOption(0),
+  CommonOptions.createShadowBlurOption(0),
+  CommonOptions.createShadowColorOption('#000000'),
+  CommonOptions.createShadowOpacityOption(0.5),
 ];
 
 const SIMPLE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

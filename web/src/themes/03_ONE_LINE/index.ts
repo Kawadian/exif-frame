@@ -3,41 +3,33 @@ import { Store } from '../../store';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
-import Font from '../../fonts';
-import { ASPECT_RATIO_OPTIONS } from '../../constants/aspect-ratios';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
 import { getCameraMakerLogo } from '../maker-logo';
+import * as CommonOptions from '../common-options';
 
 const ONE_LINE_OPTIONS: ThemeOption[] = [
-  { 
-    id: 'ASPECT_RATIO', 
-    type: 'select', 
-    options: ASPECT_RATIO_OPTIONS,
-    default: 'free', 
-    description: 'Aspect ratio for the output image' 
-  },
-  { id: 'BACKGROUND_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'PADDING_INSIDE', type: 'boolean', default: false, description: 'enable to use inside padding' },
-  { id: 'PADDING_TOP', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 250, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 100, description: 'px' },
-  { id: 'TEXT_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
-  { id: 'TEXT_ALPHA', type: 'range-slider', default: 1, min: 0, max: 1, step: 0.01, description: '0 - 1' },
-  { id: 'TEXT_ALIGN', type: 'select', options: ['center', 'right', 'left'], default: 'center', description: 'left or center or right' },
-  { id: 'FONT_STYLE', type: 'select', options: ['normal', 'italic'], default: 'normal', description: 'normal or italic' },
-  { id: 'FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 - 900' },
-  { id: 'FONT_SIZE', type: 'number', default: 70, description: 'px' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
-  { id: 'TOP_LABEL', type: 'string', default: '', description: 'ex. @username' },
-  { id: 'DIVIDER', type: 'string', default: '∙', description: 'ex. |' },
-  { id: 'TEMPLATE', type: 'string', default: '{MAKER}{BODY}{LENS}{ISO}{MM}{F}{SEC}' },
-  // Logo Settings
-  { id: 'LOGO_DARK_MODE', type: 'boolean', default: true, description: 'use dark mode (white) logo when using {LOGO}' },
-  { id: 'LOGO_HEIGHT', type: 'number', default: 50, description: 'px (logo height when using {LOGO})' },
-  { id: 'LOGO_MAX_WIDTH', type: 'number', default: 200, description: 'px (max width for logo when using {LOGO})' },
+  CommonOptions.createAspectRatioOption(),
+  CommonOptions.createBackgroundColorOption('#ffffff'),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createPaddingInsideOption(false),
+  CommonOptions.createPaddingTopOption(100),
+  CommonOptions.createPaddingBottomOption(250),
+  CommonOptions.createPaddingLeftOption(100),
+  CommonOptions.createPaddingRightOption(100),
+  CommonOptions.createTextColorOption('#000000'),
+  CommonOptions.createTextAlphaOption(1),
+  CommonOptions.createTextAlignOption('center'),
+  CommonOptions.createFontStyleOption('normal'),
+  CommonOptions.createFontWeightOption(300),
+  CommonOptions.createFontSizeOption(70),
+  CommonOptions.createFontFamilyOption('Barlow'),
+  CommonOptions.createTopLabelOption(''),
+  CommonOptions.createDividerOption('∙'),
+  { id: 'TEMPLATE', type: 'string', default: '{MAKER}{BODY}{LENS}{ISO}{MM}{F}{SEC}', description: 'theme.option.template1' },
+  CommonOptions.createLogoDarkModeOption(true),
+  CommonOptions.createLogoHeightOption(50),
+  CommonOptions.createLogoMaxWidthOption(200),
 ];
 
 const ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

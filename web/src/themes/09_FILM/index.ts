@@ -3,20 +3,20 @@ import { Store } from '../../store';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
-import Font from '../../fonts';
+import * as CommonOptions from '../common-options';
 
 const FILM_OPTIONS: ThemeOption[] = [
-  { id: 'ARTIST', type: 'string', default: '', description: 'your name' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'digital-7', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
-  { id: 'TEXT_COLOR', type: 'color', default: '#FFA500', description: 'default is orange hex code' },
-  { id: 'TEXT_ALPHA', type: 'range-slider', default: 1, min: 0, max: 1, step: 0.01, description: '0 - 1' },
-  { id: 'BACKGROUND_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'PADDING_TOP', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 0, description: 'px' },
+  CommonOptions.createArtistOption(''),
+  CommonOptions.createFontFamilyOption('digital-7'),
+  CommonOptions.createTextColorOption('#FFA500'),
+  CommonOptions.createTextAlphaOption(1),
+  CommonOptions.createBackgroundColorOption('#000000'),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createPaddingTopOption(0),
+  CommonOptions.createPaddingBottomOption(0),
+  CommonOptions.createPaddingLeftOption(0),
+  CommonOptions.createPaddingRightOption(0),
 ];
 
 const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

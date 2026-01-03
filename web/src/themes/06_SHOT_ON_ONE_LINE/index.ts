@@ -3,16 +3,17 @@ import { Store } from '../../store';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
+import * as CommonOptions from '../common-options';
 
 const SHOT_ON_ONE_LINE_OPTIONS: ThemeOption[] = [
-  { id: 'BACKGROUND_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'TEXT_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
-  { id: 'PADDING_TOP', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 0, description: 'px' },
+  CommonOptions.createBackgroundColorOption('#ffffff'),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createTextColorOption('#000000'),
+  CommonOptions.createPaddingTopOption(0),
+  CommonOptions.createPaddingBottomOption(0),
+  CommonOptions.createPaddingLeftOption(0),
+  CommonOptions.createPaddingRightOption(0),
 ];
 
 const SHOT_ON_ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

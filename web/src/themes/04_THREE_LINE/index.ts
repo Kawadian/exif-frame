@@ -5,38 +5,33 @@ import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
 import { getCameraMakerLogo } from '../maker-logo';
-import Font from '../../fonts';
+import * as CommonOptions from '../common-options';
 
 const THREE_LINE_OPTIONS: ThemeOption[] = [
-  // Background & Padding
-  { id: 'BACKGROUND_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'PADDING_INSIDE', type: 'boolean', default: false, description: 'enable to use inside padding' },
-  { id: 'PADDING_TOP', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 500, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 100, description: 'px' },
-  // Text Style
-  { id: 'TEXT_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
-  { id: 'TEXT_ALPHA', type: 'range-slider', default: 1, min: 0, max: 1, step: 0.01, description: '0 - 1' },
-  { id: 'TEXT_ALIGN', type: 'select', options: ['center', 'right', 'left'], default: 'center', description: 'left or center or right' },
-  { id: 'FONT_STYLE', type: 'select', options: ['normal', 'italic'], default: 'normal', description: 'normal or italic' },
-  { id: 'FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 500, description: '100 - 900' },
-  { id: 'FONT_SIZE', type: 'number', default: 70, description: 'px' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
-  // Top Label
-  { id: 'TOP_LABEL', type: 'string', default: '', description: 'ex. @username' },
-  // Logo Settings
-  { id: 'SHOW_LOGO', type: 'boolean', default: true, description: 'show camera maker logo' },
-  { id: 'LOGO_DARK_MODE', type: 'boolean', default: true, description: 'use dark mode (white) logo' },
-  { id: 'LOGO_HEIGHT', type: 'number', default: 140, description: 'px' },
-  { id: 'LOGO_MAX_WIDTH', type: 'number', default: 400, description: 'px (max width for logo)' },
-  // Line Settings
-  { id: 'LINE_GAP', type: 'number', default: 0, description: 'px (gap between lines, 0 = auto)' },
-  { id: 'DIVIDER', type: 'string', default: ' ', description: 'ex. | or ∙' },
-  { id: 'TEMPLATE1', type: 'string', default: '{BODY}' },
-  { id: 'TEMPLATE2', type: 'string', default: '{ISO}{MM}{F}{SEC}' },
+  CommonOptions.createBackgroundColorOption('#ffffff'),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createPaddingInsideOption(false),
+  CommonOptions.createPaddingTopOption(100),
+  CommonOptions.createPaddingBottomOption(500),
+  CommonOptions.createPaddingLeftOption(100),
+  CommonOptions.createPaddingRightOption(100),
+  CommonOptions.createTextColorOption('#000000'),
+  CommonOptions.createTextAlphaOption(1),
+  CommonOptions.createTextAlignOption('center'),
+  CommonOptions.createFontStyleOption('normal'),
+  CommonOptions.createFontWeightOption(500),
+  CommonOptions.createFontSizeOption(70),
+  CommonOptions.createFontFamilyOption('Barlow'),
+  CommonOptions.createTopLabelOption(''),
+  CommonOptions.createShowLogoOption(true),
+  CommonOptions.createLogoDarkModeOption(true),
+  CommonOptions.createLogoHeightOption(140),
+  CommonOptions.createLogoMaxWidthOption(400),
+  CommonOptions.createLineGapOption(0),
+  CommonOptions.createDividerOption(' '),
+  CommonOptions.createTemplate1Option('{BODY}'),
+  CommonOptions.createTemplate2Option('{ISO}{MM}{F}{SEC}'),
 ];
 
 const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

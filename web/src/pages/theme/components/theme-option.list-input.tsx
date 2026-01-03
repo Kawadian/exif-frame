@@ -1,13 +1,23 @@
 import { ListInput, ListItem, Range, Toggle } from 'konsta/react';
 import { useEffect, useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useStore } from '../../../store';
 import Customize from '../database/customize';
 import { ThemeOption, getConverter } from '../types/theme-option';
 import { debounce } from '../../../utils/debounce';
 
 const ThemeOptionListInput = (props: ThemeOption) => {
+  const { t } = useTranslation();
   const { selectedThemeName, rerenderOptions, darkMode, setRerenderOptions } = useStore();
   const [value, setValue] = useState(Customize.get(selectedThemeName, props.id, getConverter(props.type)) ?? props.default);
+
+  // Translate description if it's a translation key
+  const translatedDescription = useMemo(() => {
+    if (props.description && props.description.startsWith('theme.option.')) {
+      return t(props.description);
+    }
+    return props.description;
+  }, [props.description, t]);
 
   // Create a debounced function to save to localStorage and trigger re-render
   const debouncedSaveAndRerender = useMemo(
@@ -31,7 +41,7 @@ const ThemeOptionListInput = (props: ThemeOption) => {
           key={props.id}
           name={props.id}
           title={props.id}
-          info={props.description}
+          info={translatedDescription}
           value={value}
           onChange={(e) => {
             const newValue = e.target.value;
@@ -46,7 +56,7 @@ const ThemeOptionListInput = (props: ThemeOption) => {
           key={props.id}
           name={props.id}
           title={props.id}
-          info={props.description}
+          info={translatedDescription}
           value={value}
           onChange={(e) => {
             const newValue = e.target.value;
@@ -58,7 +68,7 @@ const ThemeOptionListInput = (props: ThemeOption) => {
 
       {props.type === 'color' && (
         <ListInput
-          info={props.description}
+          info={translatedDescription}
           key={props.id}
           name={props.id}
           title={props.id}
@@ -91,7 +101,7 @@ const ThemeOptionListInput = (props: ThemeOption) => {
           key={props.id}
           name={props.id}
           title={props.id}
-          info={props.description}
+          info={translatedDescription}
           value={value}
           type="select"
           onChange={(e) => {
@@ -136,7 +146,7 @@ const ThemeOptionListInput = (props: ThemeOption) => {
         <ListItem
           key={props.id}
           title={props.id}
-          footer={props.description}
+          footer={translatedDescription}
           after={
             <Toggle
               key={props.id}

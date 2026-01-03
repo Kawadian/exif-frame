@@ -5,21 +5,22 @@ import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
 import { getCameraMakerLogo } from '../maker-logo';
+import * as CommonOptions from '../common-options';
 
 const STRAP_OPTIONS: ThemeOption[] = [
-  { id: 'ARTIST', type: 'string', default: '', description: 'your name' },
-  { id: 'DARK_MODE', type: 'boolean', default: false, description: 'enable to use dark mode' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
+  CommonOptions.createArtistOption(''),
+  CommonOptions.createDarkModeOption(false),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
   { id: 'SECONDARY_TEXT_FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 - 900' },
-  { id: 'PADDING_TOP', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 0, description: 'px' },
-  { id: 'TEMPLATE1', type: 'string', default: '{ISO}{MM}{F}{SEC}' },
-  { id: 'TEMPLATE2', type: 'string', default: '{MAKER}{BODY}' },
-  { id: 'TEMPLATE3', type: 'string', default: '{TAKEN_AT}' },
-  { id: 'TEMPLATE4', type: 'string', default: '{LENS}' },
+  CommonOptions.createPaddingTopOption(0),
+  CommonOptions.createPaddingBottomOption(0),
+  CommonOptions.createPaddingLeftOption(0),
+  CommonOptions.createPaddingRightOption(0),
+  CommonOptions.createTemplate1Option('{ISO}{MM}{F}{SEC}'),
+  CommonOptions.createTemplate2Option('{MAKER}{BODY}'),
+  CommonOptions.createTemplate3Option('{TAKEN_AT}'),
+  CommonOptions.createTemplate4Option('{LENS}'),
 ];
 
 const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

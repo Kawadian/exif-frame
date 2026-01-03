@@ -3,34 +3,27 @@ import { Store } from '../../store';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
-import Font from '../../fonts';
-import { ASPECT_RATIO_OPTIONS } from '../../constants/aspect-ratios';
+import * as CommonOptions from '../common-options';
 
 const CUSTOM_TWO_LINE_OPTIONS: ThemeOption[] = [
-  { 
-    id: 'ASPECT_RATIO', 
-    type: 'select', 
-    options: ASPECT_RATIO_OPTIONS,
-    default: 'free', 
-    description: 'Aspect ratio for the output image' 
-  },
-  { id: 'BACKGROUND_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'PADDING_INSIDE', type: 'boolean', default: true, description: 'enable to use inside padding' },
-  { id: 'PADDING_TOP', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 350, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 100, description: 'px' },
-  { id: 'TEXT1', type: 'string', default: 'Your Text', description: 'ex. Hello, World!' },
-  { id: 'TEXT2', type: 'string', default: 'Your Text', description: 'ex. Hello, World!' },
-  { id: 'TEXT_ALPHA', type: 'range-slider', default: 1, min: 0, max: 1, step: 0.01, description: '0 - 1' },
-  { id: 'TEXT_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
-  { id: 'TEXT_ALIGN', type: 'select', options: ['center', 'right', 'left'], default: 'center', description: 'left or center or right' },
-  { id: 'FONT_STYLE', type: 'select', options: ['normal', 'italic'], default: 'normal', description: 'normal or italic' },
-  { id: 'FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 - 900' },
-  { id: 'FONT_SIZE', type: 'number', default: 70, description: 'px' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
+  CommonOptions.createAspectRatioOption(),
+  CommonOptions.createBackgroundColorOption('#ffffff'),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createPaddingInsideOption(true),
+  CommonOptions.createPaddingTopOption(100),
+  CommonOptions.createPaddingBottomOption(350),
+  CommonOptions.createPaddingLeftOption(100),
+  CommonOptions.createPaddingRightOption(100),
+  CommonOptions.createText1Option('Your Text'),
+  CommonOptions.createText2Option('Your Text'),
+  CommonOptions.createTextAlphaOption(1),
+  CommonOptions.createTextColorOption('#ffffff'),
+  CommonOptions.createTextAlignOption('center'),
+  CommonOptions.createFontStyleOption('normal'),
+  CommonOptions.createFontWeightOption(300),
+  CommonOptions.createFontSizeOption(70),
+  CommonOptions.createFontFamilyOption('Barlow'),
 ];
 
 const CUSTOM_TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

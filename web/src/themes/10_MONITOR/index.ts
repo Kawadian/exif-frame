@@ -3,23 +3,23 @@ import { Store } from '../../store';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
-import Font from '../../fonts';
+import * as CommonOptions from '../common-options';
 
 const MONITOR_OPTIONS: ThemeOption[] = [
-  { id: 'BACKGROUND_COLOR', type: 'color', default: '#000000', description: '#ffffff is white, #000000 is black' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'PADDING_INSIDE', type: 'boolean', default: false, description: 'enable to use inside padding' },
-  { id: 'COMPACT', type: 'boolean', default: false, description: 'enable to reduce exif text width' },
-  { id: 'PADDING_TOP', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 100, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 0, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 0, description: 'px' },
-  { id: 'TEXT_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
-  { id: 'FONT_STYLE', type: 'select', options: ['normal', 'italic'], default: 'normal', description: 'normal or italic' },
-  { id: 'FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 500, description: '100 - 900' },
-  { id: 'FONT_SIZE', type: 'number', default: 70, description: 'px' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
+  CommonOptions.createBackgroundColorOption('#000000'),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createPaddingInsideOption(false),
+  CommonOptions.createCompactOption(false),
+  CommonOptions.createPaddingTopOption(0),
+  CommonOptions.createPaddingBottomOption(100),
+  CommonOptions.createPaddingLeftOption(0),
+  CommonOptions.createPaddingRightOption(0),
+  CommonOptions.createTextColorOption('#ffffff'),
+  CommonOptions.createFontStyleOption('normal'),
+  CommonOptions.createFontWeightOption(500),
+  CommonOptions.createFontSizeOption(70),
+  CommonOptions.createFontFamilyOption('Barlow'),
 ];
 
 const MONITOR_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

@@ -3,21 +3,21 @@ import { Store } from '../../store';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
-import Font from '../../fonts';
+import * as CommonOptions from '../common-options';
 
 const LIGHTROOM_OPTIONS: ThemeOption[] = [
-  { id: 'BACKGROUND_COLOR', type: 'color', default: '#1f1f1f', description: '#ffffff is white, #000000 is black' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'PADDING_TOP', type: 'number', default: 50, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 150, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 50, description: 'px' },
-  { id: 'PADDING_RIGHT', type: 'number', default: 50, description: 'px' },
-  { id: 'TEXT_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
-  { id: 'FONT_STYLE', type: 'select', options: ['normal', 'italic'], default: 'normal', description: 'normal or italic' },
-  { id: 'FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 - 900' },
-  { id: 'FONT_SIZE', type: 'number', default: 50, description: 'px' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
+  CommonOptions.createBackgroundColorOption('#1f1f1f'),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createPaddingTopOption(50),
+  CommonOptions.createPaddingBottomOption(150),
+  CommonOptions.createPaddingLeftOption(50),
+  CommonOptions.createPaddingRightOption(50),
+  CommonOptions.createTextColorOption('#ffffff'),
+  CommonOptions.createFontStyleOption('normal'),
+  CommonOptions.createFontWeightOption(300),
+  CommonOptions.createFontSizeOption(50),
+  CommonOptions.createFontFamilyOption('Barlow'),
 ];
 
 const LIGHTROOM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {

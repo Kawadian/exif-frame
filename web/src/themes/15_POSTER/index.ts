@@ -3,32 +3,32 @@ import { Store } from '../../store';
 import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
-import Font from '../../fonts';
+import * as CommonOptions from '../common-options';
 
 const POSTER_OPTIONS: ThemeOption[] = [
-  { id: 'DARK_MODE', type: 'boolean', default: false, description: 'enable to use dark mode' },
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'Blur intensity (0-100)', category: 'effects' },
-  { id: 'PADDING_TOP', type: 'number', default: 400, description: 'px' },
-  { id: 'PADDING_BOTTOM', type: 'number', default: 400, description: 'px' },
-  { id: 'PADDING_LEFT', type: 'number', default: 150, description: 'px' },
-  { id: 'TEXT1', type: 'string', default: '2001.01.01' },
-  { id: 'TEXT2', type: 'string', default: 'Lorem Ipsum' },
-  { id: 'TEXT3', type: 'string', default: 'dolor sit amet, consectetur' },
-  { id: 'TEXT4', type: 'string', default: 'White House' },
-  { id: 'TEXT5', type: 'string', default: '1600 Pennsylvania Avenue NW, Washington, DC 20500' },
-  { id: 'TEXT1_SIZE', type: 'number', default: 80, description: 'px' },
-  { id: 'TEXT1_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 ~ 900' },
-  { id: 'TEXT2_SIZE', type: 'number', default: 200, description: 'px' },
-  { id: 'TEXT2_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 500, description: '100 ~ 900' },
-  { id: 'TEXT3_SIZE', type: 'number', default: 200, description: 'px' },
-  { id: 'TEXT3_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 500, description: '100 ~ 900' },
-  { id: 'TEXT4_SIZE', type: 'number', default: 150, description: 'px' },
-  { id: 'TEXT4_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 500, description: '100 ~ 900' },
-  { id: 'TEXT5_SIZE', type: 'number', default: 80, description: 'px' },
-  { id: 'TEXT5_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 ~ 900' },
-  { id: 'FONT_FAMILY', type: 'select', options: ['Default', 'Barlow', ...Object.values(Font)], default: 'Barlow', description: 'ex. din-alternate-bold, digital-7, Barlow, Arial, sans-serif' },
-  { id: 'SHADOW_SIZE', type: 'number', default: 10, description: '0 ~ 100' },
+  CommonOptions.createDarkModeOption(false),
+  CommonOptions.createBlurBackgroundOption(),
+  CommonOptions.createBlurAmountOption(),
+  CommonOptions.createPaddingTopOption(400),
+  CommonOptions.createPaddingBottomOption(400),
+  CommonOptions.createPaddingLeftOption(150),
+  CommonOptions.createText1Option('2001.01.01'),
+  CommonOptions.createText2Option('Lorem Ipsum'),
+  CommonOptions.createText3Option('dolor sit amet, consectetur'),
+  CommonOptions.createText4Option('White House'),
+  CommonOptions.createText5Option('1600 Pennsylvania Avenue NW, Washington, DC 20500'),
+  CommonOptions.createCustomSizeOption('TEXT1_SIZE', 80, 'px'),
+  CommonOptions.createCustomWeightOption('TEXT1_WEIGHT', 300, '100 ~ 900'),
+  CommonOptions.createCustomSizeOption('TEXT2_SIZE', 200, 'px'),
+  CommonOptions.createCustomWeightOption('TEXT2_WEIGHT', 500, '100 ~ 900'),
+  CommonOptions.createCustomSizeOption('TEXT3_SIZE', 200, 'px'),
+  CommonOptions.createCustomWeightOption('TEXT3_WEIGHT', 500, '100 ~ 900'),
+  CommonOptions.createCustomSizeOption('TEXT4_SIZE', 150, 'px'),
+  CommonOptions.createCustomWeightOption('TEXT4_WEIGHT', 500, '100 ~ 900'),
+  CommonOptions.createCustomSizeOption('TEXT5_SIZE', 80, 'px'),
+  CommonOptions.createCustomWeightOption('TEXT5_WEIGHT', 300, '100 ~ 900'),
+  CommonOptions.createFontFamilyOption('Barlow'),
+  CommonOptions.createShadowSizeOption(10),
 ];
 
 const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
