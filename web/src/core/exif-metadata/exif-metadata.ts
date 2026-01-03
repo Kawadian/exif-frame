@@ -13,7 +13,6 @@ class ExifMetadata {
   public takenAt: string | undefined;
 
   constructor(metadata: Tags) {
-    console.log(metadata);
     this.make = metadata?.Make?.description;
     this.model = metadata?.Model?.description;
     this.lensModel = this.model ? metadata?.LensModel?.description?.replace(this.model, '')?.trim() : metadata?.LensModel?.description;

@@ -30,7 +30,11 @@ export default async function convert(canvas: HTMLCanvasElement, options: Conver
   }
 
   if (options.type === 'image/webp') {
-    const arrayBuffer = await encode(canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height), { quality });
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      throw new Error('Failed to get 2D context from canvas');
+    }
+    const arrayBuffer = await encode(ctx.getImageData(0, 0, canvas.width, canvas.height), { quality });
     return `data:image/webp;base64,${Buffer.from(arrayBuffer).toString('base64')}`;
   }
 
