@@ -1,6 +1,6 @@
 import { BlockTitle, List, Navbar, Page, Tabbar, TabbarLink } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
-import { useState, useRef, useEffect } from 'react';
+import { Fragment, useEffect, useRef, useState } from 'react';
 import { useStore } from '../../store';
 import SettingsIcon from '../../icons/settings.icon';
 import ImageIcon from '../../icons/image.icon';
@@ -288,9 +288,17 @@ const ThemeSettingsPage = () => {
             </BlockTitle>
             <List strongIos inset>
               {theme?.options.map((option, index) => {
+                if (option.id === 'ASPECT_RATIO') {
+                  return (
+                    <Fragment key={option.id}>
+                      <ThemeOptionListInput {...option} />
+                      <NotCroppedModeListItem />
+                    </Fragment>
+                  );
+                }
                 return <ThemeOptionListInput {...option} key={index} />;
               })}
-              <NotCroppedModeListItem />
+              {!theme?.options.some((option) => option.id === 'ASPECT_RATIO') && <NotCroppedModeListItem />}
             </List>
           </>
         )}
@@ -389,9 +397,17 @@ const ThemeSettingsPage = () => {
                   </BlockTitle>
                   <List strongIos>
                     {theme?.options.map((option, index) => {
+                      if (option.id === 'ASPECT_RATIO') {
+                        return (
+                          <Fragment key={option.id}>
+                            <ThemeOptionListInput {...option} />
+                            <NotCroppedModeListItem />
+                          </Fragment>
+                        );
+                      }
                       return <ThemeOptionListInput {...option} key={index} />;
                     })}
-                    <NotCroppedModeListItem />
+                    {!theme?.options.some((option) => option.id === 'ASPECT_RATIO') && <NotCroppedModeListItem />}
                   </List>
                 </>
               )}
