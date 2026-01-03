@@ -122,6 +122,9 @@ type Store = {
 
   notCroppedMode: boolean;
   setNotCroppedMode: (notCroppedMode: boolean) => void;
+
+  drawerOpen: boolean;
+  setDrawerOpen: (drawerOpen: boolean) => void;
 };
 
 const useStore = create<Store>((set) => ({
@@ -345,6 +348,13 @@ const useStore = create<Store>((set) => ({
     set(() => {
       localStorage.setItem('notCroppedMode', notCroppedMode.toString());
       return { notCroppedMode };
+    }),
+
+  drawerOpen: localStorage.getItem('drawerOpen') !== 'false',
+  setDrawerOpen: (drawerOpen: boolean) =>
+    set(() => {
+      localStorage.setItem('drawerOpen', drawerOpen.toString());
+      return { drawerOpen };
     }),
 }));
 
