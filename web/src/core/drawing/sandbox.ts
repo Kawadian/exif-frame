@@ -12,185 +12,146 @@ interface SandboxOptions {
   blurBackground?: { amount: number };
 }
 
-// Note: Shadow and photo border effects are currently only applied in 'free' ratio mode
-// to maintain simplicity and avoid potential rendering issues in complex ratio-based layouts
+const hexToRgba = (hex: string, alpha: number): string => {
+  let normalizedHex = hex.replace('#', '');
+
+  if (normalizedHex.length === 3) {
+    normalizedHex = normalizedHex
+      .split('')
+      .map((c) => c + c)
+      .join('');
+  }
+
+  const r = parseInt(normalizedHex.slice(0, 2), 16);
+  const g = parseInt(normalizedHex.slice(2, 4), 16);
+  const b = parseInt(normalizedHex.slice(4, 6), 16);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
+const sanitizePadding = (padding: SandboxOptions['padding']) => ({
+  top: Math.max(0, padding.top),
+  bottom: Math.max(0, padding.bottom),
+  left: Math.max(0, padding.left),
+  right: Math.max(0, padding.right),
+});
+
+const getImageDrawRect = (image: HTMLImageElement, frame: { x: number; y: number; width: number; height: number }, mode: 'cover' | 'contain') => {
+  const scale = mode === 'cover' ? Math.max(frame.width / image.width, frame.height / image.height) : Math.min(frame.width / image.width, frame.height / image.height);
+  const width = image.width * scale;
+  const height = image.height * scale;
+
+  return {
+    x: frame.x + (frame.width - width) / 2,
+    y: frame.y + (frame.height - height) / 2,
+    width,
+    height,
+  };
+};
+
+const drawBackground = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement, image: HTMLImageElement, backgroundColor: string, blurBackground?: { amount: number }) => {
+  if (!blurBackground) {
+    context.fillStyle = backgroundColor;
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    return;
+  }
+
+  context.save();
+  context.filter = `blur(${Math.max(0, blurBackground.amount)}px)`;
+
+  const rect = getImageDrawRect(image, { x: 0, y: 0, width: canvas.width, height: canvas.height }, 'cover');
+  context.drawImage(image, rect.x, rect.y, rect.width, rect.height);
+
+  context.restore();
+};
+
+const drawPaddingMasks = (context: CanvasRenderingContext2D, canvas: HTMLCanvasElement, padding: SandboxOptions['padding']) => {
+  const { top, bottom, left, right } = padding;
+
+  context.fillRect(0, 0, canvas.width, top);
+  context.fillRect(0, canvas.height - bottom, canvas.width, bottom);
+  context.fillRect(0, 0, left, canvas.height);
+  context.fillRect(canvas.width - right, 0, right, canvas.height);
+};
+
+const drawEffects = (context: CanvasRenderingContext2D, rect: { x: number; y: number; width: number; height: number }, image: HTMLImageElement, photoBorder?: SandboxOptions['photoBorder'], shadow?: SandboxOptions['shadow']) => {
+  if (shadow && shadow.blur > 0) {
+    context.shadowOffsetX = shadow.offsetX;
+    context.shadowOffsetY = shadow.offsetY;
+    context.shadowBlur = shadow.blur;
+    context.shadowColor = hexToRgba(shadow.color, shadow.opacity);
+  }
+
+  context.drawImage(image, rect.x, rect.y, rect.width, rect.height);
+
+  context.shadowOffsetX = 0;
+  context.shadowOffsetY = 0;
+  context.shadowBlur = 0;
+  context.shadowColor = 'transparent';
+
+  if (photoBorder && photoBorder.width > 0) {
+    context.strokeStyle = photoBorder.color;
+    context.lineWidth = photoBorder.width;
+    context.strokeRect(rect.x, rect.y, rect.width, rect.height);
+  }
+};
 
 const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
   const { image } = photo;
-  const { backgroundColor, padding, targetRatio, notCroppedMode, photoBorder, shadow, blurBackground } = options;
+  const { backgroundColor, targetRatio, notCroppedMode, photoBorder, shadow, blurBackground } = options;
+  const padding = sanitizePadding(options.padding);
   const { top, bottom, left, right } = padding;
-
   const canvas = document.createElement('canvas');
-  
-  // Helper to parse hex color to rgba
-  const hexToRgba = (hex: string, alpha: number): string => {
-    // Remove # if present
-    hex = hex.replace('#', '');
-    
-    // Handle short hex (e.g., #fff -> #ffffff)
-    if (hex.length === 3) {
-      hex = hex.split('').map(c => c + c).join('');
-    }
-    
-    // Parse RGB components
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    
-    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  };
-  
-  // Track image boundaries for effects
-  let imgX = 0, imgY = 0, imgWidth = 0, imgHeight = 0;
-
-  const drawBlurredCoverBackground = (context: CanvasRenderingContext2D) => {
-    const blurAmount = Math.max(0, blurBackground?.amount ?? 0);
-    context.save();
-    context.filter = `blur(${blurAmount}px)`;
-
-    const scale = Math.max(canvas.width / image.width, canvas.height / image.height);
-    const drawWidth = image.width * scale;
-    const drawHeight = image.height * scale;
-    const drawX = (canvas.width - drawWidth) / 2;
-    const drawY = (canvas.height - drawHeight) / 2;
-    context.drawImage(image, drawX, drawY, drawWidth, drawHeight);
-
-    context.restore();
-  };
 
   if (targetRatio === 'free') {
-    if (image.width > image.height) {
-      imgWidth = MAX_SIZE - left - right;
-      imgHeight = (image.height / image.width) * imgWidth;
-    } else {
-      imgHeight = MAX_SIZE - top - bottom;
-      imgWidth = (image.width / image.height) * imgHeight;
-    }
+    const availableWidth = Math.max(1, MAX_SIZE - left - right);
+    const availableHeight = Math.max(1, MAX_SIZE - top - bottom);
+    const scale = image.width >= image.height ? availableWidth / image.width : availableHeight / image.height;
+    const imgWidth = image.width * scale;
+    const imgHeight = image.height * scale;
+    const imgX = left;
+    const imgY = top;
 
-    canvas.width = imgWidth + left + right;
-    canvas.height = imgHeight + top + bottom;
-    
-    imgX = left;
-    imgY = top;
+    canvas.width = Math.min(MAX_SIZE, imgWidth + left + right);
+    canvas.height = Math.min(MAX_SIZE, imgHeight + top + bottom);
 
     const context = canvas.getContext('2d')!;
-    if (blurBackground) {
-      drawBlurredCoverBackground(context);
-    } else {
-      context.fillStyle = backgroundColor;
-      context.fillRect(0, 0, canvas.width, canvas.height);
-    }
-    
-    // Apply shadow before drawing the image
-    if (shadow && shadow.blur > 0) {
-      context.shadowOffsetX = shadow.offsetX;
-      context.shadowOffsetY = shadow.offsetY;
-      context.shadowBlur = shadow.blur;
-      context.shadowColor = hexToRgba(shadow.color, shadow.opacity);
-    }
-    
-    context.drawImage(image, imgX, imgY, imgWidth, imgHeight);
-    
-    // Reset shadow
-    context.shadowOffsetX = 0;
-    context.shadowOffsetY = 0;
-    context.shadowBlur = 0;
-    context.shadowColor = 'transparent';
-    
-    // Apply photo border if specified
-    if (photoBorder && photoBorder.width > 0) {
-      context.strokeStyle = photoBorder.color;
-      context.lineWidth = photoBorder.width;
-      context.strokeRect(imgX, imgY, imgWidth, imgHeight);
-    }
+    drawBackground(context, canvas, image, backgroundColor, blurBackground);
+    drawEffects(context, { x: imgX, y: imgY, width: imgWidth, height: imgHeight }, image, photoBorder, shadow);
+
+    return canvas;
+  }
+
+  const ratio = targetRatio.split(':').map((value) => Number(value));
+
+  if (ratio.length !== 2 || ratio[0] <= 0 || ratio[1] <= 0) {
+    throw new Error('Invalid target ratio');
+  }
+
+  if (ratio[0] > ratio[1]) {
+    canvas.width = MAX_SIZE;
+    canvas.height = (ratio[1] / ratio[0]) * MAX_SIZE;
   } else {
-    const ratio = targetRatio.split(':').map((value) => Number(value));
+    canvas.width = (ratio[0] / ratio[1]) * MAX_SIZE;
+    canvas.height = MAX_SIZE;
+  }
 
-    if (ratio.length !== 2) {
-      throw new Error('Invalid target ratio');
-    }
+  const context = canvas.getContext('2d')!;
+  drawBackground(context, canvas, image, backgroundColor, blurBackground);
 
-    if (ratio[0] <= 0 || ratio[1] <= 0) {
-      throw new Error('Invalid target ratio');
-    }
+  const frame = {
+    x: left,
+    y: top,
+    width: Math.max(1, canvas.width - left - right),
+    height: Math.max(1, canvas.height - top - bottom),
+  };
+  const rect = getImageDrawRect(image, frame, notCroppedMode ? 'contain' : 'cover');
 
-    if (ratio[0] > ratio[1]) {
-      canvas.width = MAX_SIZE;
-      canvas.height = (ratio[1] / ratio[0]) * MAX_SIZE;
-    } else {
-      canvas.width = (ratio[0] / ratio[1]) * MAX_SIZE;
-      canvas.height = MAX_SIZE;
-    }
+  drawEffects(context, rect, image, photoBorder, shadow);
 
-    const context = canvas.getContext('2d')!;
-    if (blurBackground) {
-      drawBlurredCoverBackground(context);
-    } else {
-      context.fillStyle = backgroundColor;
-      context.fillRect(0, 0, canvas.width, canvas.height);
-    }
-
-    if (!notCroppedMode) {
-      if (image.width > image.height) {
-        const imageHeight = canvas.height - top - bottom;
-        const imageWidth = (image.width / image.height) * imageHeight;
-        context.drawImage(image, 0, 0, image.width, image.height, (MAX_SIZE - imageWidth) / 2, top, imageWidth, imageHeight);
-        if (!blurBackground) {
-          context.fillRect(0, 0, left, canvas.height);
-          context.fillRect(canvas.width - right, 0, right, canvas.height);
-        }
-      }
-
-      if (image.width < image.height) {
-        const imageWidth = canvas.width - left - right;
-        const imageHeight = (image.height / image.width) * imageWidth;
-        context.drawImage(image, 0, 0, image.width, image.height, left, (MAX_SIZE - imageHeight) / 2, imageWidth, imageHeight);
-        if (!blurBackground) {
-          context.fillRect(0, 0, canvas.width, top);
-          context.fillRect(0, canvas.height - bottom, canvas.width, bottom);
-        }
-      }
-    } else {
-      if (ratio[0] > ratio[1]) {
-        let imageHeight = canvas.height - top - bottom;
-        let imageWidth = canvas.width - left - right;
-        if (image.width / image.height > ratio[0] / ratio[1]) {
-          imageHeight = (image.height / image.width) * imageWidth;
-        } else {
-          imageWidth = (image.width / image.height) * imageHeight;
-        }
-        context.drawImage(
-          image,
-          0,
-          0,
-          image.width,
-          image.height,
-          left + (canvas.width - left - right - imageWidth) / 2,
-          top + (canvas.height - top - bottom - imageHeight) / 2,
-          imageWidth,
-          imageHeight
-        );
-      } else {
-        let imageWidth = canvas.width - left - right;
-        let imageHeight = canvas.height - top - bottom;
-        if (image.width / image.height > ratio[0] / ratio[1]) {
-          imageHeight = (image.height / image.width) * imageWidth;
-        } else {
-          imageWidth = (image.width / image.height) * imageHeight;
-        }
-        context.drawImage(
-          image,
-          0,
-          0,
-          image.width,
-          image.height,
-          left + (canvas.width - left - right - imageWidth) / 2,
-          top + (canvas.height - top - bottom - imageHeight) / 2,
-          imageWidth,
-          imageHeight
-        );
-      }
-    }
+  if (!notCroppedMode && !blurBackground) {
+    context.fillStyle = backgroundColor;
+    drawPaddingMasks(context, canvas, padding);
   }
 
   return canvas;
