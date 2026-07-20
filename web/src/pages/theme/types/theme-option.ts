@@ -6,6 +6,9 @@ type StringOption = {
 type NumberOption = {
   type: 'number';
   default: number;
+  min?: number;
+  max?: number;
+  step?: number;
 };
 
 type BooleanOption = {
