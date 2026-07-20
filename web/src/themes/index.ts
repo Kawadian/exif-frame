@@ -10,6 +10,7 @@ import { CUSTOM_TWO_LINE_FUNC, CUSTOM_TWO_LINE_OPTIONS } from './13_CUSTOM_TWO_L
 import { POSTER_FUNC, POSTER_OPTIONS } from './15_POSTER';
 import { CINEMASCOPE_FUNC, CINEMASCOPE_OPTIONS } from './16_CINEMASCOPE';
 import { SOCIAL_EDITORIAL_FUNC, SOCIAL_EDITORIAL_OPTIONS, SOCIAL_GALLERY_FUNC, SOCIAL_GALLERY_OPTIONS, SOCIAL_REEL_FUNC, SOCIAL_REEL_OPTIONS } from './18_SOCIAL_EDITORIAL';
+import { SHOT_CARD_FUNC, SHOT_CARD_OPTIONS } from './19_SHOT_CARD';
 
 type AcceptInputType = string | number | boolean;
 
@@ -51,6 +52,7 @@ const themes = [
   { name: 'Social Gallery', func: SOCIAL_GALLERY_FUNC, options: SOCIAL_GALLERY_OPTIONS },
   { name: 'Reel Cover', func: SOCIAL_REEL_FUNC, options: SOCIAL_REEL_OPTIONS },
   { name: 'Editorial Logo', func: SOCIAL_EDITORIAL_FUNC, options: SOCIAL_EDITORIAL_OPTIONS },
+  { name: 'Shot Card', func: SHOT_CARD_FUNC, options: SHOT_CARD_OPTIONS },
 ];
 
 export default themes;
