@@ -308,6 +308,31 @@ export const createShadowSizeOption = (defaultValue: number = 10): ThemeOption =
   description: 'theme.option.shadow-size'
 });
 
+export const createShowShadowOption = (defaultValue: boolean = true): ThemeOption => ({
+  id: 'SHOW_SHADOW',
+  type: 'boolean',
+  default: defaultValue,
+  description: 'theme.option.show-shadow',
+  category: 'effects'
+});
+
+export const createLetterSpacingOption = (defaultValue: number = 12): ThemeOption => ({
+  id: 'LETTER_SPACING',
+  type: 'range-slider',
+  default: defaultValue,
+  min: 0,
+  max: 40,
+  step: 1,
+  description: 'theme.option.letter-spacing'
+});
+
+export const createTextToPhotoGapOption = (defaultValue: number = 72): ThemeOption => ({
+  id: 'TEXT_TO_PHOTO_GAP',
+  type: 'number',
+  default: defaultValue,
+  description: 'theme.option.text-to-photo-gap'
+});
+
 // テキスト（カスタム用）
 export const createTextOption = (defaultValue: string = 'Your Text'): ThemeOption => ({
   id: 'TEXT',
