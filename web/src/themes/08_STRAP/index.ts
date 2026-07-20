@@ -8,6 +8,7 @@ import { getCameraMakerLogo } from '../maker-logo';
 import * as CommonOptions from '../common-options';
 
 const STRAP_OPTIONS: ThemeOption[] = [
+  CommonOptions.createAspectRatioOption(),
   CommonOptions.createArtistOption(''),
   CommonOptions.createDarkModeOption(false),
   CommonOptions.createBlurBackgroundOption(),
@@ -31,6 +32,7 @@ const STRAP_OPTIONS: ThemeOption[] = [
 ];
 
 const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
+  const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const ARTIST = (input.get('ARTIST') as string).trim();
   const DARK_MODE = input.get('DARK_MODE') as boolean;
   const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
@@ -129,7 +131,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
     .join(' ');
 
   const canvas = sandbox(photo, {
-    targetRatio: store.ratio,
+    targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },

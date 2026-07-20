@@ -5,12 +5,12 @@ import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-opt
 import { ASPECT_RATIO_OPTIONS } from '../../constants/aspect-ratios';
 
 const JUST_FRAME_OPTIONS: ThemeOption[] = [
-  { 
-    id: 'ASPECT_RATIO', 
-    type: 'select', 
+  {
+    id: 'ASPECT_RATIO',
+    type: 'select',
     options: ASPECT_RATIO_OPTIONS,
-    default: 'free', 
-    description: 'Aspect ratio for the output image' 
+    default: 'free',
+    description: 'theme.option.aspect-ratio',
   },
   { id: 'BACKGROUND_COLOR', type: 'color', default: '#ffffff', description: '#ffffff is white, #000000 is black' },
   { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'Use blurred photo as background', category: 'effects' },
@@ -46,7 +46,7 @@ const JUST_FRAME_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
   const SHADOW_OPACITY = input.get('SHADOW_OPACITY') as number;
 
   return sandbox(photo, {
-    targetRatio: ASPECT_RATIO === 'free' ? store.ratio : ASPECT_RATIO,
+    targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
