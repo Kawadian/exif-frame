@@ -55,6 +55,9 @@ export const createPaddingTopOption = (defaultValue: number = 100): ThemeOption 
   id: 'PADDING_TOP',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 500,
+  step: 1,
   description: 'theme.option.padding-top'
 });
 
@@ -62,6 +65,9 @@ export const createPaddingBottomOption = (defaultValue: number = 100): ThemeOpti
   id: 'PADDING_BOTTOM',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 500,
+  step: 1,
   description: 'theme.option.padding-bottom'
 });
 
@@ -69,6 +75,9 @@ export const createPaddingLeftOption = (defaultValue: number = 100): ThemeOption
   id: 'PADDING_LEFT',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 500,
+  step: 1,
   description: 'theme.option.padding-left'
 });
 
@@ -76,6 +85,9 @@ export const createPaddingRightOption = (defaultValue: number = 100): ThemeOptio
   id: 'PADDING_RIGHT',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 500,
+  step: 1,
   description: 'theme.option.padding-right'
 });
 
@@ -128,6 +140,9 @@ export const createFontSizeOption = (defaultValue: number = 70): ThemeOption => 
   id: 'FONT_SIZE',
   type: 'number',
   default: defaultValue,
+  min: 8,
+  max: 200,
+  step: 1,
   description: 'theme.option.font-size'
 });
 
@@ -158,6 +173,9 @@ export const createLogoHeightOption = (defaultValue: number = 140): ThemeOption 
   id: 'LOGO_HEIGHT',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 400,
+  step: 1,
   description: 'theme.option.logo-height'
 });
 
@@ -165,6 +183,9 @@ export const createLogoMaxWidthOption = (defaultValue: number = 400): ThemeOptio
   id: 'LOGO_MAX_WIDTH',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 1000,
+  step: 1,
   description: 'theme.option.logo-max-width'
 });
 
@@ -187,6 +208,9 @@ export const createLineGapOption = (defaultValue: number = 0): ThemeOption => ({
   id: 'LINE_GAP',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 200,
+  step: 1,
   description: 'theme.option.line-gap'
 });
 
@@ -253,6 +277,9 @@ export const createPhotoBorderWidthOption = (defaultValue: number = 0): ThemeOpt
   id: 'PHOTO_BORDER_WIDTH',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 50,
+  step: 1,
   description: 'theme.option.photo-border-width'
 });
 
@@ -267,6 +294,9 @@ export const createShadowOffsetXOption = (defaultValue: number = 0): ThemeOption
   id: 'SHADOW_OFFSET_X',
   type: 'number',
   default: defaultValue,
+  min: -200,
+  max: 200,
+  step: 1,
   description: 'theme.option.shadow-offset-x'
 });
 
@@ -274,6 +304,9 @@ export const createShadowOffsetYOption = (defaultValue: number = 0): ThemeOption
   id: 'SHADOW_OFFSET_Y',
   type: 'number',
   default: defaultValue,
+  min: -200,
+  max: 200,
+  step: 1,
   description: 'theme.option.shadow-offset-y'
 });
 
@@ -281,6 +314,9 @@ export const createShadowBlurOption = (defaultValue: number = 0): ThemeOption =>
   id: 'SHADOW_BLUR',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 200,
+  step: 1,
   description: 'theme.option.shadow-blur'
 });
 
@@ -305,6 +341,9 @@ export const createShadowSizeOption = (defaultValue: number = 10): ThemeOption =
   id: 'SHADOW_SIZE',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 100,
+  step: 1,
   description: 'theme.option.shadow-size'
 });
 
@@ -330,6 +369,9 @@ export const createTextToPhotoGapOption = (defaultValue: number = 72): ThemeOpti
   id: 'TEXT_TO_PHOTO_GAP',
   type: 'number',
   default: defaultValue,
+  min: 0,
+  max: 300,
+  step: 1,
   description: 'theme.option.text-to-photo-gap'
 });
 
@@ -381,6 +423,9 @@ export const createCustomSizeOption = (id: string, defaultValue: number, descrip
   id,
   type: 'number',
   default: defaultValue,
+  min: 8,
+  max: 200,
+  step: 1,
   description: descriptionKey
 });
 

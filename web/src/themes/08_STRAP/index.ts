@@ -13,7 +13,7 @@ const STRAP_OPTIONS: ThemeOption[] = [
   CommonOptions.createDarkModeOption(false),
   CommonOptions.createBlurBackgroundOption(),
   CommonOptions.createBlurAmountOption(),
-  { id: 'SECONDARY_TEXT_FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: '100 - 900' },
+  { id: 'SECONDARY_TEXT_FONT_WEIGHT', type: 'range-slider', min: 100, max: 900, step: 100, default: 300, description: 'theme.option.secondary-text-font-weight' },
   CommonOptions.createPaddingTopOption(0),
   CommonOptions.createPaddingBottomOption(0),
   CommonOptions.createPaddingLeftOption(0),
