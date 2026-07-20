@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox from '../../core/drawing/sandbox';
+import sandbox, { getContainInsets } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import * as CommonOptions from '../common-options';
@@ -73,15 +73,17 @@ const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: St
   const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
   const SHADOW_SIZE = input.get('SHADOW_SIZE') as number;
 
-  const canvas = sandbox(photo, {
+  const padding = { top: 0, right: 0, bottom: 0, left: 0 };
+  const { canvas, imageRect } = sandbox(photo, {
     targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: DARK_MODE ? '#ffffff' : '#000000',
-    padding: { top: 0, right: 0, bottom: 0, left: 0 },
+    padding,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
+  const insets = getContainInsets(canvas, padding, imageRect);
 
   const context = canvas.getContext('2d')!;
   context.fillStyle = DARK_MODE ? '#000000' : '#ffffff';
@@ -91,19 +93,19 @@ const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: St
   context.textAlign = 'left';
 
   context.font = `normal ${TEXT1_WEIGHT} ${TEXT1_SIZE}px ${actualFontFamily}`;
-  context.fillText(TEXT1, PADDING_LEFT, PADDING_TOP);
+  context.fillText(TEXT1, PADDING_LEFT, PADDING_TOP + insets.top);
 
   context.font = `normal ${TEXT2_WEIGHT} ${TEXT2_SIZE}px ${actualFontFamily}`;
-  context.fillText(TEXT2, PADDING_LEFT, PADDING_TOP + TEXT1_SIZE * 2);
+  context.fillText(TEXT2, PADDING_LEFT, PADDING_TOP + TEXT1_SIZE * 2 + insets.top);
 
   context.font = `normal ${TEXT3_WEIGHT} ${TEXT3_SIZE}px ${actualFontFamily}`;
-  context.fillText(TEXT3, PADDING_LEFT, PADDING_TOP + TEXT1_SIZE * 2 + TEXT2_SIZE * 1.2);
+  context.fillText(TEXT3, PADDING_LEFT, PADDING_TOP + TEXT1_SIZE * 2 + TEXT2_SIZE * 1.2 + insets.top);
 
   context.font = `normal ${TEXT4_WEIGHT} ${TEXT4_SIZE}px ${actualFontFamily}`;
-  context.fillText(TEXT4, PADDING_LEFT, canvas.height - PADDING_BOTTOM - TEXT5_SIZE * 1.5);
+  context.fillText(TEXT4, PADDING_LEFT, canvas.height - PADDING_BOTTOM - TEXT5_SIZE * 1.5 - insets.bottom);
 
   context.font = `normal ${TEXT5_WEIGHT} ${TEXT5_SIZE}px ${actualFontFamily}`;
-  context.fillText(TEXT5, PADDING_LEFT, canvas.height - PADDING_BOTTOM);
+  context.fillText(TEXT5, PADDING_LEFT, canvas.height - PADDING_BOTTOM - insets.bottom);
 
   return canvas;
 };

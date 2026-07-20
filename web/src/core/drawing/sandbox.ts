@@ -33,6 +33,13 @@ interface SandboxOptions {
   blurBackground?: { amount: number };
 }
 
+type ImageRect = { x: number; y: number; width: number; height: number };
+
+type SandboxResult = {
+  canvas: HTMLCanvasElement;
+  imageRect: ImageRect;
+};
+
 const hexToRgba = (hex: string, alpha: number): string => {
   let normalizedHex = hex.replace('#', '');
 
@@ -67,6 +74,25 @@ const getImageDrawRect = (image: HTMLImageElement, frame: { x: number; y: number
     y: frame.y + (frame.height - height) / 2,
     width,
     height,
+  };
+};
+
+/**
+ * Letterbox insets between the padding frame and the drawn photo.
+ * Non-zero only in not-cropped (contain) mode when the image does not fill the frame.
+ */
+const getContainInsets = (canvas: HTMLCanvasElement, padding: SandboxOptions['padding'], imageRect: ImageRect) => {
+  const { top, bottom, left, right } = sanitizePadding(padding);
+  const frameTop = top;
+  const frameBottom = canvas.height - bottom;
+  const frameLeft = left;
+  const frameRight = canvas.width - right;
+
+  return {
+    top: Math.max(0, imageRect.y - frameTop),
+    bottom: Math.max(0, frameBottom - (imageRect.y + imageRect.height)),
+    left: Math.max(0, imageRect.x - frameLeft),
+    right: Math.max(0, frameRight - (imageRect.x + imageRect.width)),
   };
 };
 
@@ -117,7 +143,7 @@ const drawEffects = (context: CanvasRenderingContext2D, rect: { x: number; y: nu
   }
 };
 
-const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
+const sandbox = (photo: Photo, options: SandboxOptions): SandboxResult => {
   const { image } = photo;
   const { backgroundColor, targetRatio, notCroppedMode, photoBorder, shadow, blurBackground } = options;
   const padding = sanitizePadding(options.padding);
@@ -133,15 +159,16 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
     const imgHeight = image.height * scale;
     const imgX = left;
     const imgY = top;
+    const imageRect = { x: imgX, y: imgY, width: imgWidth, height: imgHeight };
 
     canvas.width = Math.min(maxSize, imgWidth + left + right);
     canvas.height = Math.min(maxSize, imgHeight + top + bottom);
 
     const context = canvas.getContext('2d')!;
     drawBackground(context, canvas, image, backgroundColor, blurBackground);
-    drawEffects(context, { x: imgX, y: imgY, width: imgWidth, height: imgHeight }, image, photoBorder, shadow);
+    drawEffects(context, imageRect, image, photoBorder, shadow);
 
-    return canvas;
+    return { canvas, imageRect };
   }
 
   const ratio = targetRatio.split(':').map((value) => Number(value));
@@ -167,17 +194,18 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
     width: Math.max(1, canvas.width - left - right),
     height: Math.max(1, canvas.height - top - bottom),
   };
-  const rect = getImageDrawRect(image, frame, notCroppedMode ? 'contain' : 'cover');
+  const imageRect = getImageDrawRect(image, frame, notCroppedMode ? 'contain' : 'cover');
 
-  drawEffects(context, rect, image, photoBorder, shadow);
+  drawEffects(context, imageRect, image, photoBorder, shadow);
 
   if (!notCroppedMode && !blurBackground) {
     context.fillStyle = backgroundColor;
     drawPaddingMasks(context, canvas, padding);
   }
 
-  return canvas;
+  return { canvas, imageRect };
 };
 
 export default sandbox;
-export { getMaxSize, getSizeScale, runWithPreviewMaxSize };
+export { getMaxSize, getSizeScale, runWithPreviewMaxSize, getContainInsets };
+export type { ImageRect, SandboxResult };

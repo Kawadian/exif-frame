@@ -37,7 +37,7 @@ const NO_FRAME_THEME_FUNC: ThemeFunc = (photo: Photo, input, store) => {
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
-  });
+  }).canvas;
 };
 
 export { NO_FRAME_THEME_FUNC, NO_FRAME_OPTIONS };

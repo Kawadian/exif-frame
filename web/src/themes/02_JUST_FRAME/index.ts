@@ -59,7 +59,7 @@ const JUST_FRAME_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
       opacity: SHADOW_OPACITY 
     } : undefined,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
-  });
+  }).canvas;
 };
 
 export { JUST_FRAME_FUNC, JUST_FRAME_OPTIONS };
