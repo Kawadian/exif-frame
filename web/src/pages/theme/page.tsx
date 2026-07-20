@@ -198,10 +198,18 @@ const ThemeSettingsPage = () => {
     });
 
     const func = currentTheme.func;
+    let cancelled = false;
 
     render(func, photoToPreview, input, store).then((canvas) => {
+      if (cancelled) {
+        free(canvas);
+        return;
+      }
       const ctx = preview.getContext('2d');
-      if (!ctx) return;
+      if (!ctx) {
+        free(canvas);
+        return;
+      }
       
       const ratio = canvas.width / canvas.height;
       if (preview.width > preview.height) {
@@ -215,6 +223,10 @@ const ThemeSettingsPage = () => {
       ctx.drawImage(canvas, 0, 0, preview.width, preview.height);
       free(canvas);
     });
+
+    return () => {
+      cancelled = true;
+    };
   }, [selectedThemeName, rerenderOptions, tabIndex, previewPhoto, photos, isMobile]);
 
   useEffect(() => {
