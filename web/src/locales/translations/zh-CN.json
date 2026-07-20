@@ -37,6 +37,9 @@
   "root.themes.preview": "预览",
   "root.themes.list": "列表",
   "root.themes.customize": "自定义",
+  "root.themes.customize.frame": "边框",
+  "root.themes.customize.photo": "照片",
+  "root.themes.customize.text": "文字",
 
   "root.successfully-downloaded-in-gallery": "已成功下载到图库",
 

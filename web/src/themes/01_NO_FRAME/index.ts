@@ -6,8 +6,8 @@ import * as CommonOptions from '../common-options';
 
 const NO_FRAME_OPTIONS: ThemeOption[] = [
   CommonOptions.createAspectRatioOption(),
-  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'theme.option.blur-background', category: 'effects' },
-  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'theme.option.blur-amount', category: 'effects' },
+  { id: 'BLUR_BACKGROUND', type: 'boolean', default: false, description: 'theme.option.blur-background', category: 'frame' },
+  { id: 'BLUR_AMOUNT', type: 'range-slider', default: 20, min: 0, max: 100, step: 1, description: 'theme.option.blur-amount', category: 'frame' },
   { id: 'PHOTO_BORDER_WIDTH', type: 'number', default: 0, min: 0, max: 50, step: 1, description: 'theme.option.photo-border-width' },
   { id: 'PHOTO_BORDER_COLOR', type: 'color', default: '#000000', description: 'theme.option.photo-border-color' },
   { id: 'SHADOW_OFFSET_X', type: 'number', default: 0, min: -200, max: 200, step: 1, description: 'theme.option.shadow-offset-x' },
