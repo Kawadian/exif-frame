@@ -4,7 +4,7 @@ import sandbox, { getSizeScale } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
-import { getCameraMakerLogo } from '../maker-logo';
+import { getCameraMakerLogo, getLogoDrawSize } from '../maker-logo';
 import * as CommonOptions from '../common-options';
 
 const STRAP_OPTIONS: ThemeOption[] = [
@@ -191,7 +191,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
   context.stroke();
 
   // DRAW ICON
-  let TARGET_LOGO_HEIGHT = FONT_SIZE * 2;
+  const TARGET_LOGO_HEIGHT = FONT_SIZE * 2;
   const TARGET_LOGO_WIDTH = 400 * sizeScale;
 
   const maker = overrideExifMetadata()?.make || photo.metadata.make;
@@ -199,17 +199,13 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
   const logo = getCameraMakerLogo({ darkMode: DARK_MODE, make: maker, model });
 
   if (logo) {
-    let LOGO_WIDTH = (logo.width / logo.height) * TARGET_LOGO_HEIGHT;
-    if (LOGO_WIDTH > TARGET_LOGO_WIDTH) {
-      LOGO_WIDTH = TARGET_LOGO_WIDTH;
-      TARGET_LOGO_HEIGHT = (logo.height / logo.width) * TARGET_LOGO_WIDTH;
-    }
+    const { width: LOGO_WIDTH, height: LOGO_HEIGHT } = getLogoDrawSize(logo, TARGET_LOGO_HEIGHT, TARGET_LOGO_WIDTH);
     context.drawImage(
       logo,
       canvas.width - Math.max(topWidth, bottomWidth) - FONT_SIZE * 2 - FONT_SIZE - LOGO_WIDTH,
-      canvas.height - PADDING_BOTTOM / 2 - TARGET_LOGO_HEIGHT / 2,
+      canvas.height - PADDING_BOTTOM / 2 - LOGO_HEIGHT / 2,
       LOGO_WIDTH,
-      TARGET_LOGO_HEIGHT
+      LOGO_HEIGHT
     );
   }
 

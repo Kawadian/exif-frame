@@ -1,8 +1,21 @@
 const supportLogo = new Map<string, HTMLImageElement>();
 
+const assetUrl = (pathname: string): string => {
+  const base = import.meta.env.BASE_URL || '/';
+  const normalized = pathname.replace(/^\//, '');
+  return `${base}${normalized}`;
+};
+
+const pendingLogoLoads: Promise<void>[] = [];
+
 const loadLogo = (pathname: string): HTMLImageElement => {
   const image = new Image();
-  image.src = pathname;
+  const promise = new Promise<void>((resolve) => {
+    image.onload = () => resolve();
+    image.onerror = () => resolve();
+  });
+  pendingLogoLoads.push(promise);
+  image.src = assetUrl(pathname);
   return image;
 };
 
@@ -49,6 +62,14 @@ supportLogo.set('SIGMA_DARK', loadLogo('/maker/dark/sigma.png'));
 supportLogo.set('SONY_LIGHT', loadLogo('/maker/light/sony.png'));
 supportLogo.set('SONY_DARK', loadLogo('/maker/dark/sony.png'));
 
+const logosReadyPromise = Promise.all(pendingLogoLoads).then(() => undefined);
+
+const whenMakerLogosReady = (): Promise<void> => logosReadyPromise;
+
+const isLogoDrawable = (logo?: HTMLImageElement | null): logo is HTMLImageElement => {
+  return !!logo && logo.complete && logo.naturalWidth > 0 && logo.naturalHeight > 0;
+};
+
 const normalize = (value?: string): string => (value || '').toUpperCase();
 
 const includesAny = (haystack: string, ...needles: string[]): boolean => {
@@ -74,7 +95,7 @@ const BRAND_KEYWORDS: Record<string, string[]> = {
   PANASONIC: ['PANASONIC'],
   PHASEONE: ['PHASE'],
   PENTAX: ['PENTAX'],
-  RICOH: ['RICOH'],
+  RICOH: ['RICOH', 'RICO'],
   SIGMA: ['SIGMA'],
   SONY: ['SONY'],
   SAMSUNG: ['SAMSUNG'],
@@ -97,7 +118,23 @@ const getCameraMakerLogo = (params: { darkMode: boolean; make?: string; model?: 
   const key = pickLogoKey(params.make, params.model);
   if (!key) return undefined;
 
-  return params.darkMode ? supportLogo.get(`${key}_DARK`) : supportLogo.get(`${key}_LIGHT`);
+  const logo = params.darkMode ? supportLogo.get(`${key}_DARK`) : supportLogo.get(`${key}_LIGHT`);
+  // Incomplete or broken images throw InvalidStateError in drawImage and blank entire themes.
+  if (!isLogoDrawable(logo)) return undefined;
+
+  return logo;
 };
 
-export { getCameraMakerLogo };
+const getLogoDrawSize = (logo: HTMLImageElement, targetHeight: number, maxWidth: number): { width: number; height: number } => {
+  let height = targetHeight;
+  let width = (logo.naturalWidth / logo.naturalHeight) * height;
+
+  if (width > maxWidth) {
+    width = maxWidth;
+    height = (logo.naturalHeight / logo.naturalWidth) * maxWidth;
+  }
+
+  return { width, height };
+};
+
+export { getCameraMakerLogo, getLogoDrawSize, isLogoDrawable, whenMakerLogosReady };

@@ -5,6 +5,7 @@ import themes from '../../../themes';
 import { Store, useStore } from '../../../store';
 import { ThemeOption, ThemeOptionInput, getConverter } from '../types/theme-option';
 import Customize from '../database/customize';
+import { whenMakerLogosReady } from '../../../themes/maker-logo';
 
 const PREVIEW_MAX_SIZE = 480;
 const SOURCE_MAX_DIM = 640;
@@ -176,6 +177,7 @@ class ThemeListPreviewQueue {
     }
 
     try {
+      await whenMakerLogosReady();
       const sourcePhoto = await this.getSourcePhoto(task.photo);
       if (task.generation !== this.generation) {
         this.running = false;

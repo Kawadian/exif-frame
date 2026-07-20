@@ -3,8 +3,10 @@ import resize from './resize';
 import { Store } from '../../store';
 import { ThemeFunc } from './theme';
 import { ThemeOptionInput } from '../../pages/theme/types/theme-option';
+import { whenMakerLogosReady } from '../../themes/maker-logo';
 
 const render = async (func: ThemeFunc, photo: Photo, option: ThemeOptionInput, store: Store): Promise<HTMLCanvasElement> => {
+  await whenMakerLogosReady();
   let canvas = func(photo, option, store);
 
   if (store.fixWatermark && store.watermark) {

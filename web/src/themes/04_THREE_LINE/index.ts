@@ -4,7 +4,7 @@ import sandbox from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
-import { getCameraMakerLogo } from '../maker-logo';
+import { getCameraMakerLogo, getLogoDrawSize } from '../maker-logo';
 import * as CommonOptions from '../common-options';
 
 const THREE_LINE_OPTIONS: ThemeOption[] = [
@@ -123,14 +123,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
 
   if (logo) {
     const maxWidth = Math.min(LOGO_MAX_WIDTH, canvas.width - PADDING_LEFT - PADDING_RIGHT);
-
-    let drawHeight = LOGO_HEIGHT;
-    let drawWidth = (logo.width / logo.height) * drawHeight;
-
-    if (drawWidth > maxWidth) {
-      drawWidth = maxWidth;
-      drawHeight = (logo.height / logo.width) * drawWidth;
-    }
+    const { width: drawWidth, height: drawHeight } = getLogoDrawSize(logo, LOGO_HEIGHT, maxWidth);
 
     // Calculate logo X position based on text alignment
     let logoX: number;

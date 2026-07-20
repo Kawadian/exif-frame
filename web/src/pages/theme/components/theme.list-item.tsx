@@ -69,7 +69,7 @@ const ThemeListItem = ({ name }: ThemeListItemProps) => {
             style={{ width: '4.5rem', height: '3.5rem', flexShrink: 0 }}
           >
             {previewUrl ? (
-              <img src={previewUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+              <img src={previewUrl} alt="" className="w-full h-full object-contain" draggable={false} />
             ) : (
               <div className="w-full h-full animate-pulse bg-gray-300 dark:bg-gray-700" />
             )}

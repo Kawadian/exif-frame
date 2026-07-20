@@ -317,8 +317,15 @@ const Preview = forwardRef<PreviewRef, PreviewProps>(({ height, onHeightChange }
     });
 
     const func = theme?.func;
+    if (!func) return;
 
-    render(func!, photoToPreview, input, store).then((canvas) => {
+    let cancelled = false;
+
+    render(func, photoToPreview, input, store).then((canvas) => {
+      if (cancelled) {
+        free(canvas);
+        return;
+      }
       const ctx = preview.getContext('2d')!;
       const ratio = canvas.width / canvas.height;
       if (preview.width > preview.height) {
@@ -332,6 +339,10 @@ const Preview = forwardRef<PreviewRef, PreviewProps>(({ height, onHeightChange }
       ctx.drawImage(canvas, 0, 0, preview.width, preview.height);
       free(canvas);
     });
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedThemeName, rerenderOptions, tabIndex, previewPhoto]);
 
