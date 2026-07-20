@@ -1,6 +1,6 @@
 import { BlockTitle, List, Page, Tabbar, TabbarLink } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
-import { Fragment, useEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import { useStore } from '../../store';
 import SettingsIcon from '../../icons/settings.icon';
 import ImageIcon from '../../icons/image.icon';
@@ -16,23 +16,39 @@ import Preview, { DEFAULT_HEIGHT } from './components/preview';
 import type { PreviewRef } from './components/preview';
 import RerenderButton from './components/rerender.button';
 import render from '../../core/drawing/render';
-import { ThemeOptionInput, getConverter } from './types/theme-option';
+import { ThemeOption, ThemeOptionInput, getConverter } from './types/theme-option';
 import Customize from './database/customize';
 import free from '../../core/drawing/free';
 import { themeListPreviewQueue } from './components/theme-list-preview';
+import { CustomizeCategory, filterOptionsByCategory, getAvailableCustomizeCategories } from '../../themes/customize-category';
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
+
+const subTabButtonClass = (active: boolean) =>
+  `flex-1 py-1.5 text-center text-sm font-medium transition-colors ${
+    active
+      ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
+      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+  }`;
+
+const categoryTabButtonClass = (active: boolean) =>
+  `flex-1 py-1.5 text-center text-sm font-medium rounded-md transition-colors ${
+    active
+      ? 'bg-blue-600 text-white dark:bg-blue-500'
+      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+  }`;
 
 const ThemeSettingsPage = () => {
   const { t } = useTranslation();
   const { selectedThemeName, setTabIndex, drawerOpen, setDrawerOpen, rerenderOptions, tabIndex, previewPhoto, photos } = useStore();
   const theme = themes.find((theme) => theme.name === selectedThemeName);
   const [activeSubTab, setActiveSubTab] = useState<'list' | 'customize'>('list');
+  const [activeCustomizeCategory, setActiveCustomizeCategory] = useState<CustomizeCategory>('frame');
   const [previewHeight, setPreviewHeight] = useState(DEFAULT_HEIGHT);
   const [isMobile, setIsMobile] = useState(false);
   const previewRef = useRef<PreviewRef>(null);
-  
+
   // Desktop preview states
   const [scale, setScale] = useState(1);
   const [panX, setPanX] = useState(0);
@@ -45,6 +61,20 @@ const ThemeSettingsPage = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   const hasCustomizeOptions = theme?.options && theme.options.length > 0;
+  const availableCustomizeCategories = useMemo(() => getAvailableCustomizeCategories(theme?.options), [theme?.options]);
+  const categorizedOptions = useMemo(
+    () => filterOptionsByCategory(theme?.options, activeCustomizeCategory),
+    [theme?.options, activeCustomizeCategory]
+  );
+
+  useEffect(() => {
+    if (availableCustomizeCategories.length === 0) {
+      return;
+    }
+    if (!availableCustomizeCategories.includes(activeCustomizeCategory)) {
+      setActiveCustomizeCategory(availableCustomizeCategories[0]);
+    }
+  }, [availableCustomizeCategories, activeCustomizeCategory]);
 
   // Desktop preview zoom and pan handlers
   const clampZoom = (value: number) => Math.min(Math.max(MIN_ZOOM, value), MAX_ZOOM);
@@ -171,10 +201,10 @@ const ThemeSettingsPage = () => {
   // Render canvas for desktop preview
   useEffect(() => {
     if (isMobile || !canvasRef.current) return;
-    
+
     const preview = canvasRef.current;
     const store = useStore.getState();
-    
+
     preview.width = 0;
     preview.height = 0;
 
@@ -185,9 +215,9 @@ const ThemeSettingsPage = () => {
 
     const input: ThemeOptionInput = new Map<string, string | number | boolean>();
     const currentTheme = themes.find((theme) => theme.name === selectedThemeName);
-    
+
     if (!currentTheme || !currentTheme.func) return;
-    
+
     currentTheme.options?.forEach((option) => {
       const value = Customize.get(selectedThemeName, option.id, getConverter(option.type));
       if (value !== null) {
@@ -210,7 +240,7 @@ const ThemeSettingsPage = () => {
         free(canvas);
         return;
       }
-      
+
       const ratio = canvas.width / canvas.height;
       if (preview.width > preview.height) {
         preview.width = 4000;
@@ -244,43 +274,82 @@ const ThemeSettingsPage = () => {
     };
   }, []);
 
+  const renderOption = (option: ThemeOption) => {
+    if (option.id === 'ASPECT_RATIO') {
+      return (
+        <Fragment key={option.id}>
+          <ThemeOptionListInput {...option} />
+          <NotCroppedModeListItem />
+        </Fragment>
+      );
+    }
+    return <ThemeOptionListInput {...option} key={option.id} />;
+  };
+
+  const renderSubTabs = () => (
+    <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-black">
+      <button className={subTabButtonClass(activeSubTab === 'list')} onClick={() => setActiveSubTab('list')}>
+        {t('root.themes.list')}
+      </button>
+      {hasCustomizeOptions && (
+        <button className={subTabButtonClass(activeSubTab === 'customize')} onClick={() => setActiveSubTab('customize')}>
+          {t('root.themes.customize')}
+        </button>
+      )}
+    </div>
+  );
+
+  const renderCustomizeCategoryTabs = () => {
+    if (availableCustomizeCategories.length <= 1) {
+      return null;
+    }
+
+    return (
+      <div className="flex gap-2 px-4 pt-3">
+        {availableCustomizeCategories.map((category) => (
+          <button key={category} className={categoryTabButtonClass(activeCustomizeCategory === category)} onClick={() => setActiveCustomizeCategory(category)}>
+            {t(`root.themes.customize.${category}`)}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  const renderCustomizeContent = (listInset: boolean) => {
+    const optionsToRender = availableCustomizeCategories.length <= 1 ? theme?.options ?? [] : categorizedOptions;
+    const showNotCroppedAtEnd =
+      !theme?.options?.some((option) => option.id === 'ASPECT_RATIO') &&
+      (availableCustomizeCategories.length <= 1 || activeCustomizeCategory === 'frame');
+
+    return (
+      <>
+        <BlockTitle className={listInset ? 'mt-4' : undefined}>
+          {t('root.themes.customize')}
+          <ThemeOptionResetButton />
+        </BlockTitle>
+        {renderCustomizeCategoryTabs()}
+        <List strongIos inset={listInset}>
+          {optionsToRender.map((option) => renderOption(option))}
+          {showNotCroppedAtEnd && <NotCroppedModeListItem />}
+        </List>
+      </>
+    );
+  };
+
   // Mobile layout (existing vertical layout)
   if (isMobile) {
     return (
       <Page style={{ paddingBottom: '10rem' }}>
+        {/* Preview stays sticky; list/customize tabs scroll away so they don't block options */}
         <div className="sticky z-50 bg-gray-100 dark:bg-black shadow-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
           <Preview ref={previewRef} height={previewHeight} onHeightChange={setPreviewHeight} />
           <div className="flex justify-center pb-2 gap-2">
             <RerenderButton />
             <RerenderButton isZoomReset onClick={() => previewRef.current?.resetZoom()} />
           </div>
-
-          {/* サブタブ切り替え */}
-          <div className="flex border-b border-gray-200 dark:border-gray-700">
-            <button
-              className={`flex-1 py-3 text-center font-medium transition-colors ${
-                activeSubTab === 'list'
-                  ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                  : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-              }`}
-              onClick={() => setActiveSubTab('list')}
-            >
-              {t('root.themes.list')}
-            </button>
-            {hasCustomizeOptions && (
-              <button
-                className={`flex-1 py-3 text-center font-medium transition-colors ${
-                  activeSubTab === 'customize'
-                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-                onClick={() => setActiveSubTab('customize')}
-              >
-                {t('root.themes.customize')}
-              </button>
-            )}
-          </div>
         </div>
+
+        {renderSubTabs()}
 
         {/* テーマリスト */}
         {activeSubTab === 'list' && (
@@ -295,28 +364,7 @@ const ThemeSettingsPage = () => {
         )}
 
         {/* カスタマイズ */}
-        {activeSubTab === 'customize' && hasCustomizeOptions && (
-          <>
-            <BlockTitle className="mt-4">
-              {t('root.themes.customize')}
-              <ThemeOptionResetButton />
-            </BlockTitle>
-            <List strongIos inset>
-              {theme?.options.map((option, index) => {
-                if (option.id === 'ASPECT_RATIO') {
-                  return (
-                    <Fragment key={option.id}>
-                      <ThemeOptionListInput {...option} />
-                      <NotCroppedModeListItem />
-                    </Fragment>
-                  );
-                }
-                return <ThemeOptionListInput {...option} key={index} />;
-              })}
-              {!theme?.options.some((option) => option.id === 'ASPECT_RATIO') && <NotCroppedModeListItem />}
-            </List>
-          </>
-        )}
+        {activeSubTab === 'customize' && hasCustomizeOptions && renderCustomizeContent(true)}
 
         <Tabbar labels={true} icons={true} className="left-0 bottom-0 fixed">
           <TabbarLink key={1} active={false} label={t('root.tab.convert')} icon={<GenerateIcon size={24} />} onClick={() => setTabIndex(0)} />
@@ -363,31 +411,8 @@ const ThemeSettingsPage = () => {
           } overflow-hidden`}
         >
           <div className="flex-1 overflow-y-auto">
-            {/* Drawer tabs */}
-            <div className="flex border-b border-gray-200 dark:border-gray-700 sticky top-0 bg-white dark:bg-black z-10">
-              <button
-                className={`flex-1 py-3 text-center font-medium transition-colors ${
-                  activeSubTab === 'list'
-                    ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                }`}
-                onClick={() => setActiveSubTab('list')}
-              >
-                {t('root.themes.list')}
-              </button>
-              {hasCustomizeOptions && (
-                <button
-                  className={`flex-1 py-3 text-center font-medium transition-colors ${
-                    activeSubTab === 'customize'
-                      ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
-                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
-                  }`}
-                  onClick={() => setActiveSubTab('customize')}
-                >
-                  {t('root.themes.customize')}
-                </button>
-              )}
-            </div>
+            {/* Drawer tabs scroll with content so they don't permanently cover options */}
+            {renderSubTabs()}
 
             {/* Drawer content */}
             <div className="p-4">
@@ -402,28 +427,7 @@ const ThemeSettingsPage = () => {
                 </>
               )}
 
-              {activeSubTab === 'customize' && hasCustomizeOptions && (
-                <>
-                  <BlockTitle>
-                    {t('root.themes.customize')}
-                    <ThemeOptionResetButton />
-                  </BlockTitle>
-                  <List strongIos>
-                    {theme?.options.map((option, index) => {
-                      if (option.id === 'ASPECT_RATIO') {
-                        return (
-                          <Fragment key={option.id}>
-                            <ThemeOptionListInput {...option} />
-                            <NotCroppedModeListItem />
-                          </Fragment>
-                        );
-                      }
-                      return <ThemeOptionListInput {...option} key={index} />;
-                    })}
-                    {!theme?.options.some((option) => option.id === 'ASPECT_RATIO') && <NotCroppedModeListItem />}
-                  </List>
-                </>
-              )}
+              {activeSubTab === 'customize' && hasCustomizeOptions && renderCustomizeContent(false)}
             </div>
           </div>
         </div>

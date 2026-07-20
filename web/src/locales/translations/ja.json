@@ -37,6 +37,9 @@
   "root.themes.list": "リスト",
   "root.themes.preview": "プレビュー",
   "root.themes.customize": "カスタマイズ",
+  "root.themes.customize.frame": "フレーム",
+  "root.themes.customize.photo": "写真",
+  "root.themes.customize.text": "テキスト",
 
   "root.successfully-downloaded-in-gallery": "ギャラリーに保存しました",
 

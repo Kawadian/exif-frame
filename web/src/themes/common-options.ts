@@ -13,7 +13,8 @@ export const createAspectRatioOption = (): ThemeOption => ({
   type: 'select',
   options: ASPECT_RATIO_OPTIONS,
   default: 'free',
-  description: 'theme.option.aspect-ratio'
+  description: 'theme.option.aspect-ratio',
+  category: 'frame'
 });
 
 // 背景関連
@@ -21,7 +22,8 @@ export const createBackgroundColorOption = (defaultValue: string = '#ffffff'): T
   id: 'BACKGROUND_COLOR',
   type: 'color',
   default: defaultValue,
-  description: 'theme.option.background-color'
+  description: 'theme.option.background-color',
+  category: 'frame'
 });
 
 export const createBlurBackgroundOption = (): ThemeOption => ({
@@ -29,7 +31,7 @@ export const createBlurBackgroundOption = (): ThemeOption => ({
   type: 'boolean',
   default: false,
   description: 'theme.option.blur-background',
-  category: 'effects'
+  category: 'frame'
 });
 
 export const createBlurAmountOption = (): ThemeOption => ({
@@ -40,7 +42,7 @@ export const createBlurAmountOption = (): ThemeOption => ({
   max: 100,
   step: 1,
   description: 'theme.option.blur-amount',
-  category: 'effects'
+  category: 'frame'
 });
 
 // パディング関連
@@ -48,7 +50,8 @@ export const createPaddingInsideOption = (defaultValue: boolean = false): ThemeO
   id: 'PADDING_INSIDE',
   type: 'boolean',
   default: defaultValue,
-  description: 'theme.option.padding-inside'
+  description: 'theme.option.padding-inside',
+  category: 'frame'
 });
 
 export const createPaddingTopOption = (defaultValue: number = 100): ThemeOption => ({
@@ -58,7 +61,8 @@ export const createPaddingTopOption = (defaultValue: number = 100): ThemeOption 
   min: 0,
   max: 500,
   step: 1,
-  description: 'theme.option.padding-top'
+  description: 'theme.option.padding-top',
+  category: 'frame'
 });
 
 export const createPaddingBottomOption = (defaultValue: number = 100): ThemeOption => ({
@@ -68,7 +72,8 @@ export const createPaddingBottomOption = (defaultValue: number = 100): ThemeOpti
   min: 0,
   max: 500,
   step: 1,
-  description: 'theme.option.padding-bottom'
+  description: 'theme.option.padding-bottom',
+  category: 'frame'
 });
 
 export const createPaddingLeftOption = (defaultValue: number = 100): ThemeOption => ({
@@ -78,7 +83,8 @@ export const createPaddingLeftOption = (defaultValue: number = 100): ThemeOption
   min: 0,
   max: 500,
   step: 1,
-  description: 'theme.option.padding-left'
+  description: 'theme.option.padding-left',
+  category: 'frame'
 });
 
 export const createPaddingRightOption = (defaultValue: number = 100): ThemeOption => ({
@@ -88,7 +94,8 @@ export const createPaddingRightOption = (defaultValue: number = 100): ThemeOptio
   min: 0,
   max: 500,
   step: 1,
-  description: 'theme.option.padding-right'
+  description: 'theme.option.padding-right',
+  category: 'frame'
 });
 
 // テキスト関連
@@ -96,7 +103,8 @@ export const createTextColorOption = (defaultValue: string = '#000000'): ThemeOp
   id: 'TEXT_COLOR',
   type: 'color',
   default: defaultValue,
-  description: 'theme.option.text-color'
+  description: 'theme.option.text-color',
+  category: 'text'
 });
 
 export const createTextAlphaOption = (defaultValue: number = 1): ThemeOption => ({
@@ -106,7 +114,8 @@ export const createTextAlphaOption = (defaultValue: number = 1): ThemeOption => 
   min: 0,
   max: 1,
   step: 0.01,
-  description: 'theme.option.text-alpha'
+  description: 'theme.option.text-alpha',
+  category: 'text'
 });
 
 export const createTextAlignOption = (defaultValue: 'center' | 'left' | 'right' = 'center'): ThemeOption => ({
@@ -114,7 +123,8 @@ export const createTextAlignOption = (defaultValue: 'center' | 'left' | 'right' 
   type: 'select',
   options: ['center', 'right', 'left'],
   default: defaultValue,
-  description: 'theme.option.text-align'
+  description: 'theme.option.text-align',
+  category: 'text'
 });
 
 // フォント関連
@@ -123,7 +133,8 @@ export const createFontStyleOption = (defaultValue: 'normal' | 'italic' = 'norma
   type: 'select',
   options: ['normal', 'italic'],
   default: defaultValue,
-  description: 'theme.option.font-style'
+  description: 'theme.option.font-style',
+  category: 'text'
 });
 
 export const createFontWeightOption = (defaultValue: number = 500): ThemeOption => ({
@@ -133,7 +144,8 @@ export const createFontWeightOption = (defaultValue: number = 500): ThemeOption 
   max: 900,
   step: 100,
   default: defaultValue,
-  description: 'theme.option.font-weight'
+  description: 'theme.option.font-weight',
+  category: 'text'
 });
 
 export const createFontSizeOption = (defaultValue: number = 70): ThemeOption => ({
@@ -143,7 +155,8 @@ export const createFontSizeOption = (defaultValue: number = 70): ThemeOption => 
   min: 8,
   max: 200,
   step: 1,
-  description: 'theme.option.font-size'
+  description: 'theme.option.font-size',
+  category: 'text'
 });
 
 export const createFontFamilyOption = (defaultValue: string = 'Barlow'): ThemeOption => ({
@@ -151,7 +164,8 @@ export const createFontFamilyOption = (defaultValue: string = 'Barlow'): ThemeOp
   type: 'select',
   options: ['Default', 'Barlow', ...Object.values(Font)],
   default: defaultValue,
-  description: 'theme.option.font-family'
+  description: 'theme.option.font-family',
+  category: 'text'
 });
 
 // ロゴ関連
@@ -159,14 +173,16 @@ export const createShowLogoOption = (defaultValue: boolean = true): ThemeOption 
   id: 'SHOW_LOGO',
   type: 'boolean',
   default: defaultValue,
-  description: 'theme.option.show-logo'
+  description: 'theme.option.show-logo',
+  category: 'text'
 });
 
 export const createLogoDarkModeOption = (defaultValue: boolean = true): ThemeOption => ({
   id: 'LOGO_DARK_MODE',
   type: 'boolean',
   default: defaultValue,
-  description: 'theme.option.logo-dark-mode'
+  description: 'theme.option.logo-dark-mode',
+  category: 'text'
 });
 
 export const createLogoHeightOption = (defaultValue: number = 140): ThemeOption => ({
@@ -176,7 +192,8 @@ export const createLogoHeightOption = (defaultValue: number = 140): ThemeOption 
   min: 0,
   max: 400,
   step: 1,
-  description: 'theme.option.logo-height'
+  description: 'theme.option.logo-height',
+  category: 'text'
 });
 
 export const createLogoMaxWidthOption = (defaultValue: number = 400): ThemeOption => ({
@@ -186,7 +203,8 @@ export const createLogoMaxWidthOption = (defaultValue: number = 400): ThemeOptio
   min: 0,
   max: 1000,
   step: 1,
-  description: 'theme.option.logo-max-width'
+  description: 'theme.option.logo-max-width',
+  category: 'text'
 });
 
 // ラベル・テンプレート関連
@@ -194,14 +212,16 @@ export const createTopLabelOption = (defaultValue: string = ''): ThemeOption => 
   id: 'TOP_LABEL',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.top-label'
+  description: 'theme.option.top-label',
+  category: 'text'
 });
 
 export const createDividerOption = (defaultValue: string = ' '): ThemeOption => ({
   id: 'DIVIDER',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.divider'
+  description: 'theme.option.divider',
+  category: 'text'
 });
 
 export const createLineGapOption = (defaultValue: number = 0): ThemeOption => ({
@@ -211,7 +231,8 @@ export const createLineGapOption = (defaultValue: number = 0): ThemeOption => ({
   min: 0,
   max: 200,
   step: 1,
-  description: 'theme.option.line-gap'
+  description: 'theme.option.line-gap',
+  category: 'text'
 });
 
 // テンプレート
@@ -219,28 +240,32 @@ export const createTemplate1Option = (defaultValue: string): ThemeOption => ({
   id: 'TEMPLATE1',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.template1'
+  description: 'theme.option.template1',
+  category: 'text'
 });
 
 export const createTemplate2Option = (defaultValue: string): ThemeOption => ({
   id: 'TEMPLATE2',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.template2'
+  description: 'theme.option.template2',
+  category: 'text'
 });
 
 export const createTemplate3Option = (defaultValue: string): ThemeOption => ({
   id: 'TEMPLATE3',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.template3'
+  description: 'theme.option.template3',
+  category: 'text'
 });
 
 export const createTemplate4Option = (defaultValue: string): ThemeOption => ({
   id: 'TEMPLATE4',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.template4'
+  description: 'theme.option.template4',
+  category: 'text'
 });
 
 // その他のカスタムオプション
@@ -248,28 +273,32 @@ export const createDarkModeOption = (defaultValue: boolean = false): ThemeOption
   id: 'DARK_MODE',
   type: 'boolean',
   default: defaultValue,
-  description: 'theme.option.dark-mode'
+  description: 'theme.option.dark-mode',
+  category: 'frame'
 });
 
 export const createArtistOption = (defaultValue: string = ''): ThemeOption => ({
   id: 'ARTIST',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.artist'
+  description: 'theme.option.artist',
+  category: 'text'
 });
 
 export const createCompactOption = (defaultValue: boolean = false): ThemeOption => ({
   id: 'COMPACT',
   type: 'boolean',
   default: defaultValue,
-  description: 'theme.option.compact'
+  description: 'theme.option.compact',
+  category: 'text'
 });
 
 export const createLabelOption = (defaultValue: string = '@username'): ThemeOption => ({
   id: 'LABEL',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.label'
+  description: 'theme.option.label',
+  category: 'text'
 });
 
 // 写真のボーダー・シャドウ
@@ -280,14 +309,16 @@ export const createPhotoBorderWidthOption = (defaultValue: number = 0): ThemeOpt
   min: 0,
   max: 50,
   step: 1,
-  description: 'theme.option.photo-border-width'
+  description: 'theme.option.photo-border-width',
+  category: 'photo'
 });
 
 export const createPhotoBorderColorOption = (defaultValue: string = '#000000'): ThemeOption => ({
   id: 'PHOTO_BORDER_COLOR',
   type: 'color',
   default: defaultValue,
-  description: 'theme.option.photo-border-color'
+  description: 'theme.option.photo-border-color',
+  category: 'photo'
 });
 
 export const createShadowOffsetXOption = (defaultValue: number = 0): ThemeOption => ({
@@ -297,7 +328,8 @@ export const createShadowOffsetXOption = (defaultValue: number = 0): ThemeOption
   min: -200,
   max: 200,
   step: 1,
-  description: 'theme.option.shadow-offset-x'
+  description: 'theme.option.shadow-offset-x',
+  category: 'photo'
 });
 
 export const createShadowOffsetYOption = (defaultValue: number = 0): ThemeOption => ({
@@ -307,7 +339,8 @@ export const createShadowOffsetYOption = (defaultValue: number = 0): ThemeOption
   min: -200,
   max: 200,
   step: 1,
-  description: 'theme.option.shadow-offset-y'
+  description: 'theme.option.shadow-offset-y',
+  category: 'photo'
 });
 
 export const createShadowBlurOption = (defaultValue: number = 0): ThemeOption => ({
@@ -317,14 +350,16 @@ export const createShadowBlurOption = (defaultValue: number = 0): ThemeOption =>
   min: 0,
   max: 200,
   step: 1,
-  description: 'theme.option.shadow-blur'
+  description: 'theme.option.shadow-blur',
+  category: 'photo'
 });
 
 export const createShadowColorOption = (defaultValue: string = '#000000'): ThemeOption => ({
   id: 'SHADOW_COLOR',
   type: 'color',
   default: defaultValue,
-  description: 'theme.option.shadow-color'
+  description: 'theme.option.shadow-color',
+  category: 'photo'
 });
 
 export const createShadowOpacityOption = (defaultValue: number = 0.5): ThemeOption => ({
@@ -334,7 +369,8 @@ export const createShadowOpacityOption = (defaultValue: number = 0.5): ThemeOpti
   min: 0,
   max: 1,
   step: 0.01,
-  description: 'theme.option.shadow-opacity'
+  description: 'theme.option.shadow-opacity',
+  category: 'photo'
 });
 
 export const createShadowSizeOption = (defaultValue: number = 10): ThemeOption => ({
@@ -344,7 +380,8 @@ export const createShadowSizeOption = (defaultValue: number = 10): ThemeOption =
   min: 0,
   max: 100,
   step: 1,
-  description: 'theme.option.shadow-size'
+  description: 'theme.option.shadow-size',
+  category: 'photo'
 });
 
 export const createShowShadowOption = (defaultValue: boolean = true): ThemeOption => ({
@@ -352,7 +389,7 @@ export const createShowShadowOption = (defaultValue: boolean = true): ThemeOptio
   type: 'boolean',
   default: defaultValue,
   description: 'theme.option.show-shadow',
-  category: 'effects'
+  category: 'photo'
 });
 
 export const createLetterSpacingOption = (defaultValue: number = 12): ThemeOption => ({
@@ -362,7 +399,8 @@ export const createLetterSpacingOption = (defaultValue: number = 12): ThemeOptio
   min: 0,
   max: 40,
   step: 1,
-  description: 'theme.option.letter-spacing'
+  description: 'theme.option.letter-spacing',
+  category: 'text'
 });
 
 export const createTextToPhotoGapOption = (defaultValue: number = 72): ThemeOption => ({
@@ -372,7 +410,8 @@ export const createTextToPhotoGapOption = (defaultValue: number = 72): ThemeOpti
   min: 0,
   max: 300,
   step: 1,
-  description: 'theme.option.text-to-photo-gap'
+  description: 'theme.option.text-to-photo-gap',
+  category: 'text'
 });
 
 // テキスト（カスタム用）
@@ -380,42 +419,48 @@ export const createTextOption = (defaultValue: string = 'Your Text'): ThemeOptio
   id: 'TEXT',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.text'
+  description: 'theme.option.text',
+  category: 'text'
 });
 
 export const createText1Option = (defaultValue: string = 'Your Text'): ThemeOption => ({
   id: 'TEXT1',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.text1'
+  description: 'theme.option.text1',
+  category: 'text'
 });
 
 export const createText2Option = (defaultValue: string = 'Your Text'): ThemeOption => ({
   id: 'TEXT2',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.text2'
+  description: 'theme.option.text2',
+  category: 'text'
 });
 
 export const createText3Option = (defaultValue: string): ThemeOption => ({
   id: 'TEXT3',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.text3'
+  description: 'theme.option.text3',
+  category: 'text'
 });
 
 export const createText4Option = (defaultValue: string): ThemeOption => ({
   id: 'TEXT4',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.text4'
+  description: 'theme.option.text4',
+  category: 'text'
 });
 
 export const createText5Option = (defaultValue: string): ThemeOption => ({
   id: 'TEXT5',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.text5'
+  description: 'theme.option.text5',
+  category: 'text'
 });
 
 // サイズ・ウェイト設定用のカスタムオプション
@@ -426,7 +471,8 @@ export const createCustomSizeOption = (id: string, defaultValue: number, descrip
   min: 8,
   max: 200,
   step: 1,
-  description: descriptionKey
+  description: descriptionKey,
+  category: 'text'
 });
 
 export const createCustomWeightOption = (id: string, defaultValue: number, descriptionKey: string): ThemeOption => ({
@@ -436,33 +482,38 @@ export const createCustomWeightOption = (id: string, defaultValue: number, descr
   max: 900,
   step: 100,
   default: defaultValue,
-  description: descriptionKey
+  description: descriptionKey,
+  category: 'text'
 });
 
 export const createHideTextOption = (defaultValue: boolean = false): ThemeOption => ({
   id: 'HIDE_TEXT',
   type: 'boolean',
   default: defaultValue,
-  description: 'theme.option.hide-text'
+  description: 'theme.option.hide-text',
+  category: 'text'
 });
 
 export const createTagOption = (defaultValue: string): ThemeOption => ({
   id: 'TAG',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.tag'
+  description: 'theme.option.tag',
+  category: 'text'
 });
 
 export const createTitleOption = (defaultValue: string): ThemeOption => ({
   id: 'TITLE',
   type: 'string',
   default: defaultValue,
-  description: 'theme.option.title'
+  description: 'theme.option.title',
+  category: 'text'
 });
 
 export const createDescriptionOption = (id: string, defaultValue: string): ThemeOption => ({
   id,
   type: 'string',
   default: defaultValue,
-  description: `theme.option.${id.toLowerCase()}`
+  description: `theme.option.${id.toLowerCase()}`,
+  category: 'text'
 });

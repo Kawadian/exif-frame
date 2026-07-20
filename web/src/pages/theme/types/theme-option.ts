@@ -35,10 +35,13 @@ type ColorOption = {
   default: string;
 };
 
+type ThemeOptionCategory = 'frame' | 'photo' | 'text' | 'effects';
+
 type ThemeOption = (StringOption | NumberOption | BooleanOption | SelectOption | RangeSliderOption | ColorOption) & {
   id: string;
   description?: string;
-  category?: string;
+  /** Prefer frame | photo | text. Legacy "effects" is still accepted and remapped in UI. */
+  category?: ThemeOptionCategory;
 };
 
 type ThemeOptionInput = Map<string, string | number | boolean>;
