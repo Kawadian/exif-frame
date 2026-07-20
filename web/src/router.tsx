@@ -9,11 +9,13 @@ import SponsorsPage from './pages/sponsors';
 import LabPage from './pages/lab/page';
 import MetadataPage from './pages/metadata/page';
 
+const basename = import.meta.env.BASE_URL.replace(/\/$/, '') || undefined;
+
 const Router = () => {
   const { tabIndex } = useStore();
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Routes>
         <Route
           path="/"
