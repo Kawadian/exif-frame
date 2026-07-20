@@ -299,18 +299,37 @@ const ThemeSettingsPage = () => {
     </div>
   );
 
-  const renderCustomizeCategoryTabs = () => {
-    if (availableCustomizeCategories.length <= 1) {
-      return null;
-    }
+  /**
+   * Customize toolbar: category tabs + reset on one row.
+   * Drops the redundant "カスタマイズ" BlockTitle (already shown in List/Customize tabs)
+   * so title/reset no longer collide with フレーム/写真/テキスト.
+   */
+  const renderCustomizeToolbar = (padded: boolean) => {
+    const showCategoryTabs = availableCustomizeCategories.length > 1;
 
     return (
-      <div className="flex gap-2 px-4 pt-3">
-        {availableCustomizeCategories.map((category) => (
-          <button key={category} className={categoryTabButtonClass(activeCustomizeCategory === category)} onClick={() => setActiveCustomizeCategory(category)}>
-            {t(`root.themes.customize.${category}`)}
-          </button>
-        ))}
+      <div className={`flex items-center gap-2 py-3 ${padded ? 'px-4' : ''}`}>
+        {showCategoryTabs ? (
+          <div className="flex flex-1 min-w-0 gap-2" role="tablist" aria-label={t('root.themes.customize')}>
+            {availableCustomizeCategories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                role="tab"
+                aria-selected={activeCustomizeCategory === category}
+                className={categoryTabButtonClass(activeCustomizeCategory === category)}
+                onClick={() => setActiveCustomizeCategory(category)}
+              >
+                {t(`root.themes.customize.${category}`)}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex-1 min-w-0" />
+        )}
+        <div className="shrink-0">
+          <ThemeOptionResetButton />
+        </div>
       </div>
     );
   };
@@ -323,11 +342,7 @@ const ThemeSettingsPage = () => {
 
     return (
       <>
-        <BlockTitle className={listInset ? 'mt-4' : undefined}>
-          {t('root.themes.customize')}
-          <ThemeOptionResetButton />
-        </BlockTitle>
-        {renderCustomizeCategoryTabs()}
+        {renderCustomizeToolbar(listInset)}
         <List strongIos inset={listInset}>
           {optionsToRender.map((option) => renderOption(option))}
           {showNotCroppedAtEnd && <NotCroppedModeListItem />}
@@ -340,7 +355,7 @@ const ThemeSettingsPage = () => {
   if (isMobile) {
     return (
       <Page style={{ paddingBottom: '10rem' }}>
-        {/* Preview + list/customize stay sticky; frame/photo/text tabs scroll with content */}
+        {/* Preview + list/customize stay sticky; category toolbar scrolls with options */}
         <div className="sticky z-50 bg-gray-100 dark:bg-black shadow-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
           <Preview ref={previewRef} height={previewHeight} onHeightChange={setPreviewHeight} />
           <div className="flex justify-center pb-2 gap-2">
@@ -413,7 +428,7 @@ const ThemeSettingsPage = () => {
           <div className="shrink-0 sticky top-0 z-10 bg-white dark:bg-black">{renderSubTabs()}</div>
 
           <div className="flex-1 overflow-y-auto">
-            {/* Drawer content — frame/photo/text tabs scroll with options */}
+            {/* Drawer content — category toolbar scrolls with options */}
             <div className="p-4">
               {activeSubTab === 'list' && (
                 <>
