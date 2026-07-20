@@ -37,6 +37,9 @@
   "root.themes.list": "목록",
   "root.themes.preview": "미리보기",
   "root.themes.customize": "커스터마이징",
+  "root.themes.customize.frame": "프레임",
+  "root.themes.customize.photo": "사진",
+  "root.themes.customize.text": "텍스트",
 
   "root.successfully-downloaded-in-gallery": "갤러리에 저장되었습니다",
 
