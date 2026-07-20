@@ -36,7 +36,7 @@ const categoryTabButtonClass = (active: boolean) =>
   `flex-1 py-1.5 text-center text-sm font-medium rounded-md transition-colors ${
     active
       ? 'bg-blue-600 text-white dark:bg-blue-500'
-      : 'bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+      : 'bg-white text-gray-600 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
   }`;
 
 const ThemeSettingsPage = () => {
@@ -299,18 +299,37 @@ const ThemeSettingsPage = () => {
     </div>
   );
 
-  const renderCustomizeCategoryTabs = () => {
-    if (availableCustomizeCategories.length <= 1) {
-      return null;
-    }
+  /**
+   * Customize toolbar: category tabs + reset on one row.
+   * Drops the redundant "カスタマイズ" BlockTitle (already shown in List/Customize tabs)
+   * so title/reset no longer collide with フレーム/写真/テキスト.
+   */
+  const renderCustomizeToolbar = () => {
+    const showCategoryTabs = availableCustomizeCategories.length > 1;
 
     return (
-      <div className="flex gap-2 px-4 pt-3">
-        {availableCustomizeCategories.map((category) => (
-          <button key={category} className={categoryTabButtonClass(activeCustomizeCategory === category)} onClick={() => setActiveCustomizeCategory(category)}>
-            {t(`root.themes.customize.${category}`)}
-          </button>
-        ))}
+      <div className="flex items-center gap-2 px-4 py-2.5 border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-black">
+        {showCategoryTabs ? (
+          <div className="flex flex-1 min-w-0 gap-2" role="tablist" aria-label={t('root.themes.customize')}>
+            {availableCustomizeCategories.map((category) => (
+              <button
+                key={category}
+                type="button"
+                role="tab"
+                aria-selected={activeCustomizeCategory === category}
+                className={categoryTabButtonClass(activeCustomizeCategory === category)}
+                onClick={() => setActiveCustomizeCategory(category)}
+              >
+                {t(`root.themes.customize.${category}`)}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="flex-1 min-w-0" />
+        )}
+        <div className="shrink-0">
+          <ThemeOptionResetButton />
+        </div>
       </div>
     );
   };
@@ -322,17 +341,10 @@ const ThemeSettingsPage = () => {
       (availableCustomizeCategories.length <= 1 || activeCustomizeCategory === 'frame');
 
     return (
-      <>
-        <BlockTitle className={listInset ? 'mt-4' : undefined}>
-          {t('root.themes.customize')}
-          <ThemeOptionResetButton />
-        </BlockTitle>
-        {renderCustomizeCategoryTabs()}
-        <List strongIos inset={listInset}>
-          {optionsToRender.map((option) => renderOption(option))}
-          {showNotCroppedAtEnd && <NotCroppedModeListItem />}
-        </List>
-      </>
+      <List strongIos inset={listInset} className={listInset ? 'mt-4' : undefined}>
+        {optionsToRender.map((option) => renderOption(option))}
+        {showNotCroppedAtEnd && <NotCroppedModeListItem />}
+      </List>
     );
   };
 
@@ -340,7 +352,7 @@ const ThemeSettingsPage = () => {
   if (isMobile) {
     return (
       <Page style={{ paddingBottom: '10rem' }}>
-        {/* Preview + list/customize stay sticky; frame/photo/text tabs scroll with content */}
+        {/* Preview + list/customize (+ category toolbar when customizing) stay sticky */}
         <div className="sticky z-50 bg-gray-100 dark:bg-black shadow-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
           <Preview ref={previewRef} height={previewHeight} onHeightChange={setPreviewHeight} />
           <div className="flex justify-center pb-2 gap-2">
@@ -348,6 +360,7 @@ const ThemeSettingsPage = () => {
             <RerenderButton isZoomReset onClick={() => previewRef.current?.resetZoom()} />
           </div>
           {renderSubTabs()}
+          {activeSubTab === 'customize' && hasCustomizeOptions && renderCustomizeToolbar()}
         </div>
 
         {/* テーマリスト */}
@@ -409,11 +422,13 @@ const ThemeSettingsPage = () => {
             drawerOpen ? 'w-96' : 'w-0'
           } overflow-hidden`}
         >
-          {/* List/customize tabs stay fixed at the top of the drawer */}
-          <div className="shrink-0 sticky top-0 z-10 bg-white dark:bg-black">{renderSubTabs()}</div>
+          {/* List/customize (+ category toolbar) stay fixed at the top of the drawer */}
+          <div className="shrink-0 sticky top-0 z-10 bg-white dark:bg-black">
+            {renderSubTabs()}
+            {activeSubTab === 'customize' && hasCustomizeOptions && renderCustomizeToolbar()}
+          </div>
 
           <div className="flex-1 overflow-y-auto">
-            {/* Drawer content — frame/photo/text tabs scroll with options */}
             <div className="p-4">
               {activeSubTab === 'list' && (
                 <>
