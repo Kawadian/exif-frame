@@ -20,7 +20,11 @@ import { ThemeOption, ThemeOptionInput, getConverter } from './types/theme-optio
 import Customize from './database/customize';
 import free from '../../core/drawing/free';
 import { themeListPreviewQueue } from './components/theme-list-preview';
+import { presetListPreviewQueue } from './components/preset-list-preview';
+import PresetPanel from './components/preset-panel';
 import { CustomizeCategory, filterOptionsByCategory, getAvailableCustomizeCategories } from '../../themes/customize-category';
+
+type ThemeSubTab = 'presets' | 'themes' | 'customize';
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
@@ -43,7 +47,7 @@ const ThemeSettingsPage = () => {
   const { t } = useTranslation();
   const { selectedThemeName, setTabIndex, drawerOpen, setDrawerOpen, rerenderOptions, tabIndex, previewPhoto, photos } = useStore();
   const theme = themes.find((theme) => theme.name === selectedThemeName);
-  const [activeSubTab, setActiveSubTab] = useState<'list' | 'customize'>('list');
+  const [activeSubTab, setActiveSubTab] = useState<ThemeSubTab>('presets');
   const [activeCustomizeCategory, setActiveCustomizeCategory] = useState<CustomizeCategory>('frame');
   const [previewHeight, setPreviewHeight] = useState(DEFAULT_HEIGHT);
   const [isMobile, setIsMobile] = useState(false);
@@ -75,6 +79,12 @@ const ThemeSettingsPage = () => {
       setActiveCustomizeCategory(availableCustomizeCategories[0]);
     }
   }, [availableCustomizeCategories, activeCustomizeCategory]);
+
+  useEffect(() => {
+    if (activeSubTab === 'customize' && !hasCustomizeOptions) {
+      setActiveSubTab('themes');
+    }
+  }, [activeSubTab, hasCustomizeOptions]);
 
   // Desktop preview zoom and pan handlers
   const clampZoom = (value: number) => Math.min(Math.max(MIN_ZOOM, value), MAX_ZOOM);
@@ -271,6 +281,7 @@ const ThemeSettingsPage = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       themeListPreviewQueue.invalidate();
+      presetListPreviewQueue.invalidate();
     };
   }, []);
 
@@ -288,8 +299,11 @@ const ThemeSettingsPage = () => {
 
   const renderSubTabs = () => (
     <div className="flex border-b border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-black">
-      <button className={subTabButtonClass(activeSubTab === 'list')} onClick={() => setActiveSubTab('list')}>
-        {t('root.themes.list')}
+      <button className={subTabButtonClass(activeSubTab === 'presets')} onClick={() => setActiveSubTab('presets')}>
+        {t('root.themes.presets')}
+      </button>
+      <button className={subTabButtonClass(activeSubTab === 'themes')} onClick={() => setActiveSubTab('themes')}>
+        {t('root.themes.themes')}
       </button>
       {hasCustomizeOptions && (
         <button className={subTabButtonClass(activeSubTab === 'customize')} onClick={() => setActiveSubTab('customize')}>
@@ -365,10 +379,11 @@ const ThemeSettingsPage = () => {
           {renderSubTabs()}
         </div>
 
-        {/* テーマリスト */}
-        {activeSubTab === 'list' && (
+        {activeSubTab === 'presets' && <PresetPanel listInset />}
+
+        {activeSubTab === 'themes' && (
           <>
-            <BlockTitle className="mt-4">{t('root.themes.list')}</BlockTitle>
+            <BlockTitle className="mt-4">{t('root.themes.themes')}</BlockTitle>
             <List strongIos inset>
               {themes.map((theme, index) => (
                 <ThemeListItem key={index} name={theme.name} />
@@ -377,7 +392,6 @@ const ThemeSettingsPage = () => {
           </>
         )}
 
-        {/* カスタマイズ */}
         {activeSubTab === 'customize' && hasCustomizeOptions && renderCustomizeContent(true)}
 
         <Tabbar labels={true} icons={true} className="left-0 bottom-0 fixed">
@@ -430,9 +444,11 @@ const ThemeSettingsPage = () => {
           <div className="flex-1 overflow-y-auto">
             {/* Drawer content — category toolbar scrolls with options */}
             <div className="p-4">
-              {activeSubTab === 'list' && (
+              {activeSubTab === 'presets' && <PresetPanel listInset={false} />}
+
+              {activeSubTab === 'themes' && (
                 <>
-                  <BlockTitle>{t('root.themes.list')}</BlockTitle>
+                  <BlockTitle>{t('root.themes.themes')}</BlockTitle>
                   <List strongIos>
                     {themes.map((theme, index) => (
                       <ThemeListItem key={index} name={theme.name} />
