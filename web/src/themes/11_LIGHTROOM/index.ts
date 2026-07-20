@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox from '../../core/drawing/sandbox';
+import sandbox, { getContainInsets } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import * as CommonOptions from '../common-options';
@@ -51,15 +51,18 @@ const LIGHTROOM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store:
   const FONT_FAMILY = (input.get('FONT_FAMILY') as string).trim();
   const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
 
-  const canvas = sandbox(photo, {
+  const padding = { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT };
+  const { canvas, imageRect } = sandbox(photo, {
     targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
-    padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    padding,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
+  const insets = getContainInsets(canvas, padding, imageRect);
+  const textY = canvas.height - PADDING_BOTTOM / 2 - insets.bottom;
 
   const context = canvas.getContext('2d')!;
   context.fillStyle = TEXT_COLOR;
@@ -68,7 +71,7 @@ const LIGHTROOM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store:
   context.textAlign = 'left';
 
   if (!store.disableExposureMeter) {
-    context.fillText([`${photo.iso}`, `${photo.exposureTime}`, photo.fNumber, `${photo.focalLength}`].join('    '), PADDING_LEFT, canvas.height - PADDING_BOTTOM / 2);
+    context.fillText([`${photo.iso}`, `${photo.exposureTime}`, photo.fNumber, `${photo.focalLength}`].join('    '), PADDING_LEFT, textY);
   }
 
   context.textAlign = 'center';
@@ -78,11 +81,11 @@ const LIGHTROOM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store:
       .map((value) => value!.trim())
       .join('    '),
     canvas.width / 2,
-    canvas.height - PADDING_BOTTOM / 2
+    textY
   );
 
   context.textAlign = 'right';
-  context.fillText(photo.takenAt, canvas.width - PADDING_RIGHT, canvas.height - PADDING_BOTTOM / 2);
+  context.fillText(photo.takenAt, canvas.width - PADDING_RIGHT, textY);
 
   return canvas;
 };

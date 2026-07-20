@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox, { getSizeScale } from '../../core/drawing/sandbox';
+import sandbox, { getContainInsets, getSizeScale } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import * as CommonOptions from '../common-options';
@@ -49,15 +49,17 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
   const SHADOW_COLOR = (input.get('SHADOW_COLOR') as string).trim();
   const SHADOW_OPACITY = input.get('SHADOW_OPACITY') as number;
 
-  const canvas = sandbox(photo, {
+  const padding = { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT };
+  const { canvas, imageRect } = sandbox(photo, {
     targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
-    padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    padding,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
+  const insets = getContainInsets(canvas, padding, imageRect);
 
   const context = canvas.getContext('2d')!;
   const sizeScale = getSizeScale();
@@ -77,10 +79,10 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
     context.font = `${px(100)}px ${actualFontFamily}`;
     for (let i = 0; i < datas.length; i++) {
       const data = datas[i];
-      context.fillText(data.value, canvas.width - px(100), canvas.height - px(100) - i * px(100));
+      context.fillText(data.value, canvas.width - px(100), canvas.height - px(100) - i * px(100) - insets.bottom);
       const width = context.measureText(data.value).width;
       context.font = `${px(60)}px ${actualFontFamily}`;
-      context.fillText(data.key, canvas.width - px(100) - width - px(20), canvas.height - px(110) - i * px(100));
+      context.fillText(data.key, canvas.width - px(100) - width - px(20), canvas.height - px(110) - i * px(100) - insets.bottom);
       context.font = `${px(100)}px ${actualFontFamily}`;
     }
   }
@@ -93,7 +95,7 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
       .map((value) => value!.trim())
       .join(' '),
     px(100),
-    canvas.height - px(105)
+    canvas.height - px(105) - insets.bottom
   );
   context.fillText(
     [store.showCameraMaker ? store.overrideCameraMaker || photo.make : null, store.showCameraModel ? store.overrideCameraModel || photo.model : null]
@@ -101,10 +103,10 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
       .map((value) => value!.trim())
       .join(' '),
     px(100),
-    canvas.height - px(205)
+    canvas.height - px(205) - insets.bottom
   );
   context.font = `${px(50)}px ${actualFontFamily}`;
-  context.fillText(ARTIST ? ARTIST : photo.takenAt, px(100), canvas.height - px(305));
+  context.fillText(ARTIST ? ARTIST : photo.takenAt, px(100), canvas.height - px(305) - insets.bottom);
 
   context.globalAlpha = 1;
 

@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox, { getSizeScale } from '../../core/drawing/sandbox';
+import sandbox, { getContainInsets, getSizeScale, type ImageRect } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
@@ -19,6 +19,12 @@ type LayoutMetrics = {
   footerY: number;
   headerY: number;
   fontScale: number;
+};
+
+type BaseCanvas = {
+  canvas: HTMLCanvasElement;
+  imageRect: ImageRect;
+  padding: { top: number; bottom: number; left: number; right: number };
 };
 
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
@@ -177,7 +183,7 @@ const drawLogo = (context: CanvasRenderingContext2D, logo: HTMLImageElement | un
   return width;
 };
 
-const drawBaseCanvas = (photo: Photo, input: ThemeOptionInput, store: Store) => {
+const drawBaseCanvas = (photo: Photo, input: ThemeOptionInput, store: Store): BaseCanvas => {
   const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const BACKGROUND_COLOR = (input.get('BACKGROUND_COLOR') as string).trim();
   const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
@@ -194,24 +200,28 @@ const drawBaseCanvas = (photo: Photo, input: ThemeOptionInput, store: Store) => 
   const SHADOW_BLUR = input.get('SHADOW_BLUR') as number;
   const SHADOW_COLOR = (input.get('SHADOW_COLOR') as string).trim();
   const SHADOW_OPACITY = input.get('SHADOW_OPACITY') as number;
+  const padding = PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT };
 
-  return sandbox(photo, {
+  const { canvas, imageRect } = sandbox(photo, {
     targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
-    padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    padding,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
+
+  return { canvas, imageRect, padding };
 };
 
-const getLayoutMetrics = (canvas: HTMLCanvasElement, input: ThemeOptionInput): LayoutMetrics => {
+const getLayoutMetrics = (canvas: HTMLCanvasElement, input: ThemeOptionInput, imageRect: ImageRect, padding: BaseCanvas['padding']): LayoutMetrics => {
   const sizeScale = getSizeScale();
   const PADDING_TOP = input.get('PADDING_TOP') as number;
   const PADDING_BOTTOM = input.get('PADDING_BOTTOM') as number;
   const PADDING_LEFT = input.get('PADDING_LEFT') as number;
   const PADDING_RIGHT = input.get('PADDING_RIGHT') as number;
+  const insets = getContainInsets(canvas, padding, imageRect);
   const minSideInset = Math.max(48 * sizeScale, Math.min(canvas.width, canvas.height) * 0.035);
   const maxSideInset = Math.max(minSideInset, canvas.width * 0.18);
   const left = clamp(PADDING_LEFT, minSideInset, maxSideInset);
@@ -225,8 +235,8 @@ const getLayoutMetrics = (canvas: HTMLCanvasElement, input: ThemeOptionInput): L
     right,
     availableWidth: Math.max(1, canvas.width - left - right),
     centerX: canvas.width / 2,
-    footerY: clamp(canvas.height - bottomBand / 2, 96 * sizeScale, canvas.height - 96 * sizeScale),
-    headerY: clamp(topBand / 2, 72 * sizeScale, Math.max(72 * sizeScale, canvas.height - 96 * sizeScale)),
+    footerY: clamp(canvas.height - bottomBand / 2 - insets.bottom, 96 * sizeScale, canvas.height - 96 * sizeScale),
+    headerY: clamp(topBand / 2 + insets.top, 72 * sizeScale, Math.max(72 * sizeScale, canvas.height - 96 * sizeScale)),
     fontScale,
   };
 };
@@ -252,7 +262,7 @@ const prepareText = (canvas: HTMLCanvasElement, input: ThemeOptionInput) => {
 };
 
 const SOCIAL_GALLERY_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
-  const canvas = drawBaseCanvas(photo, input, store);
+  const { canvas, imageRect, padding } = drawBaseCanvas(photo, input, store);
   const context = prepareText(canvas, input);
   const FONT_SIZE = input.get('FONT_SIZE') as number;
   const LABEL = (input.get('LABEL') as string).trim();
@@ -261,7 +271,7 @@ const SOCIAL_GALLERY_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, s
   const LOGO_DARK_MODE = input.get('LOGO_DARK_MODE') as boolean;
   const LOGO_HEIGHT = input.get('LOGO_HEIGHT') as number;
   const LOGO_MAX_WIDTH = input.get('LOGO_MAX_WIDTH') as number;
-  const layout = getLayoutMetrics(canvas, input);
+  const layout = getLayoutMetrics(canvas, input, imageRect, padding);
   const logoHeight = scaled(LOGO_HEIGHT, layout.fontScale);
   const logoMaxWidth = scaled(LOGO_MAX_WIDTH, layout.fontScale);
   const logoWidth = SHOW_LOGO ? drawLogo(context, getLogo(photo, LOGO_DARK_MODE), layout.left, safeY(canvas, layout.footerY - scaled(44, layout.fontScale), logoHeight / 2), logoHeight, logoMaxWidth, 'left') : 0;
@@ -278,7 +288,7 @@ const SOCIAL_GALLERY_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, s
 };
 
 const SOCIAL_REEL_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
-  const canvas = drawBaseCanvas(photo, input, store);
+  const { canvas, imageRect, padding } = drawBaseCanvas(photo, input, store);
   const context = prepareText(canvas, input);
   const FONT_SIZE = input.get('FONT_SIZE') as number;
   const LABEL = (input.get('LABEL') as string).trim();
@@ -287,7 +297,7 @@ const SOCIAL_REEL_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, stor
   const LOGO_DARK_MODE = input.get('LOGO_DARK_MODE') as boolean;
   const LOGO_HEIGHT = input.get('LOGO_HEIGHT') as number;
   const LOGO_MAX_WIDTH = input.get('LOGO_MAX_WIDTH') as number;
-  const layout = getLayoutMetrics(canvas, input);
+  const layout = getLayoutMetrics(canvas, input, imageRect, padding);
 
   if (SHOW_LOGO) {
     drawLogo(context, getLogo(photo, LOGO_DARK_MODE), layout.centerX, safeY(canvas, layout.footerY - scaled(76, layout.fontScale), scaled(LOGO_HEIGHT, layout.fontScale) / 2), scaled(LOGO_HEIGHT, layout.fontScale), scaled(LOGO_MAX_WIDTH, layout.fontScale), 'center');
@@ -301,7 +311,7 @@ const SOCIAL_REEL_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, stor
 };
 
 const SOCIAL_EDITORIAL_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
-  const canvas = drawBaseCanvas(photo, input, store);
+  const { canvas, imageRect, padding } = drawBaseCanvas(photo, input, store);
   const context = prepareText(canvas, input);
   const FONT_SIZE = input.get('FONT_SIZE') as number;
   const LABEL = (input.get('LABEL') as string).trim();
@@ -310,7 +320,7 @@ const SOCIAL_EDITORIAL_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput,
   const LOGO_DARK_MODE = input.get('LOGO_DARK_MODE') as boolean;
   const LOGO_HEIGHT = input.get('LOGO_HEIGHT') as number;
   const LOGO_MAX_WIDTH = input.get('LOGO_MAX_WIDTH') as number;
-  const layout = getLayoutMetrics(canvas, input);
+  const layout = getLayoutMetrics(canvas, input, imageRect, padding);
 
   if (SHOW_LOGO) {
     drawLogo(context, getLogo(photo, LOGO_DARK_MODE), layout.left, safeY(canvas, layout.headerY, scaled(LOGO_HEIGHT, layout.fontScale) / 2), scaled(LOGO_HEIGHT, layout.fontScale), scaled(LOGO_MAX_WIDTH, layout.fontScale), 'left');

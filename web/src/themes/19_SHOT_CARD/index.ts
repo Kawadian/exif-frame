@@ -132,11 +132,12 @@ const SHOT_CARD_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store:
   const TEMPLATE = (input.get('TEMPLATE') as string).trim();
   const HIDE_TEXT = input.get('HIDE_TEXT') as boolean;
 
-  const canvas = sandbox(photo, {
+  const padding = PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT };
+  const { canvas, imageRect } = sandbox(photo, {
     targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
-    padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    padding,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHOW_SHADOW && SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
@@ -150,7 +151,8 @@ const SHOT_CARD_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store:
 
   const availableWidth = Math.max(1, canvas.width - PADDING_LEFT - PADDING_RIGHT);
   const textX = TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'right' ? canvas.width - PADDING_RIGHT : canvas.width / 2;
-  const textY = Math.max(FONT_SIZE, PADDING_TOP - Math.max(0, TEXT_TO_PHOTO_GAP));
+  // Anchor gap to the drawn photo edge so uncropped (contain) letterboxing does not leave a dead gap.
+  const textY = Math.max(FONT_SIZE, imageRect.y - Math.max(0, TEXT_TO_PHOTO_GAP));
 
   context.save();
   context.fillStyle = TEXT_COLOR;

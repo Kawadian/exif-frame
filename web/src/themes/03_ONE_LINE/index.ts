@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox from '../../core/drawing/sandbox';
+import sandbox, { getContainInsets } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
@@ -71,15 +71,17 @@ const ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
   const LOGO_HEIGHT = input.get('LOGO_HEIGHT') as number;
   const LOGO_MAX_WIDTH = input.get('LOGO_MAX_WIDTH') as number;
 
-  const canvas = sandbox(photo, {
+  const padding = PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT };
+  const { canvas, imageRect } = sandbox(photo, {
     targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
-    padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    padding,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
+  const insets = getContainInsets(canvas, padding, imageRect);
 
   const context = canvas.getContext('2d')!;
   const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
@@ -88,7 +90,7 @@ const ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
   context.font = `${FONT_STYLE} ${FONT_WEIGHT} ${FONT_SIZE}px ${actualFontFamily}`;
   context.textAlign = 'center';
   context.globalAlpha = TEXT_ALPHA;
-  context.fillText(TOP_LABEL, canvas.width / 2, PADDING_TOP / 2);
+  context.fillText(TOP_LABEL, canvas.width / 2, PADDING_TOP / 2 + insets.top);
 
   context.textAlign = TEXT_ALIGN as CanvasTextAlign;
 
@@ -119,7 +121,7 @@ const ONE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: 
     .filter(Boolean)
     .join(' ' + DIVIDER + ' ');
 
-  const textY = canvas.height - PADDING_BOTTOM / 2;
+  const textY = canvas.height - PADDING_BOTTOM / 2 - insets.bottom;
   let textX = TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'center' ? canvas.width / 2 : canvas.width - PADDING_RIGHT;
 
   // Draw logo if present

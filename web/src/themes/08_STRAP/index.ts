@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox, { getSizeScale } from '../../core/drawing/sandbox';
+import sandbox, { getContainInsets, getSizeScale } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
@@ -131,15 +131,18 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
     .filter(Boolean)
     .join(' ');
 
-  const canvas = sandbox(photo, {
+  const padding = { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT };
+  const { canvas, imageRect } = sandbox(photo, {
     targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
-    padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    padding,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
+  const insets = getContainInsets(canvas, padding, imageRect);
+  const bandY = canvas.height - PADDING_BOTTOM / 2 - insets.bottom;
   const context = canvas.getContext('2d')!;
   context.textBaseline = 'middle';
 
@@ -151,18 +154,18 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
   context.fillStyle = PRIMARY_TEXT_COLOR;
 
   if (!store.disableExposureMeter) {
-    context.fillText(text1, FONT_SIZE, canvas.height - PADDING_BOTTOM / 2 - FONT_SIZE / 2);
+    context.fillText(text1, FONT_SIZE, bandY - FONT_SIZE / 2);
   }
 
   // Shot by
   if (ARTIST) {
     context.font = `normal ${SECONDARY_TEXT_FONT_WEIGHT} ${FONT_SIZE}px Barlow`;
     context.fillStyle = SECONDARY_TEXT_COLOR;
-    context.fillText(`Shot by © ${ARTIST}`, FONT_SIZE, canvas.height - PADDING_BOTTOM / 2 + FONT_SIZE / 2);
+    context.fillText(`Shot by © ${ARTIST}`, FONT_SIZE, bandY + FONT_SIZE / 2);
   } else {
     context.font = `normal ${SECONDARY_TEXT_FONT_WEIGHT} ${FONT_SIZE}px Barlow`;
     context.fillStyle = SECONDARY_TEXT_COLOR;
-    context.fillText(text3, FONT_SIZE, canvas.height - PADDING_BOTTOM / 2 + FONT_SIZE / 2);
+    context.fillText(text3, FONT_SIZE, bandY + FONT_SIZE / 2);
   }
 
   // RIGHT SECOND
@@ -173,19 +176,19 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
   context.font = `normal 500 ${FONT_SIZE}px Barlow`;
   const makerModelText = text2;
   const topWidth = context.measureText(makerModelText).width;
-  context.fillText(makerModelText, canvas.width - FONT_SIZE, canvas.height - PADDING_BOTTOM / 2 - FONT_SIZE / 2);
+  context.fillText(makerModelText, canvas.width - FONT_SIZE, bandY - FONT_SIZE / 2);
 
   // Lens Model
   context.fillStyle = SECONDARY_TEXT_COLOR;
   context.font = `normal ${SECONDARY_TEXT_FONT_WEIGHT} ${FONT_SIZE}px Barlow`;
   const lensModelText = text4;
   const bottomWidth = context.measureText(lensModelText).width;
-  context.fillText(lensModelText, canvas.width - FONT_SIZE, canvas.height - PADDING_BOTTOM / 2 + FONT_SIZE / 2);
+  context.fillText(lensModelText, canvas.width - FONT_SIZE, bandY + FONT_SIZE / 2);
 
   // DRAW LINE
   context.beginPath();
-  context.moveTo(canvas.width - Math.max(topWidth, bottomWidth) - FONT_SIZE * 2, canvas.height - PADDING_BOTTOM / 2 - FONT_SIZE);
-  context.lineTo(canvas.width - Math.max(topWidth, bottomWidth) - FONT_SIZE * 2, canvas.height - PADDING_BOTTOM / 2 + FONT_SIZE);
+  context.moveTo(canvas.width - Math.max(topWidth, bottomWidth) - FONT_SIZE * 2, bandY - FONT_SIZE);
+  context.lineTo(canvas.width - Math.max(topWidth, bottomWidth) - FONT_SIZE * 2, bandY + FONT_SIZE);
   context.strokeStyle = SECONDARY_TEXT_COLOR;
   context.lineWidth = 2 * sizeScale;
   context.stroke();
@@ -203,7 +206,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
     context.drawImage(
       logo,
       canvas.width - Math.max(topWidth, bottomWidth) - FONT_SIZE * 2 - FONT_SIZE - LOGO_WIDTH,
-      canvas.height - PADDING_BOTTOM / 2 - LOGO_HEIGHT / 2,
+      bandY - LOGO_HEIGHT / 2,
       LOGO_WIDTH,
       LOGO_HEIGHT
     );

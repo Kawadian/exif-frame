@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox from '../../core/drawing/sandbox';
+import sandbox, { getContainInsets } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import * as CommonOptions from '../common-options';
@@ -61,15 +61,18 @@ const CUSTOM_TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, 
   const SHADOW_COLOR = (input.get('SHADOW_COLOR') as string).trim();
   const SHADOW_OPACITY = input.get('SHADOW_OPACITY') as number;
 
-  const canvas = sandbox(photo, {
+  const padding = PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT };
+  const { canvas, imageRect } = sandbox(photo, {
     targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
-    padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },
+    padding,
     blurBackground: BLUR_BACKGROUND ? { amount: BLUR_AMOUNT } : undefined,
     photoBorder: PHOTO_BORDER_WIDTH > 0 ? { width: PHOTO_BORDER_WIDTH, color: PHOTO_BORDER_COLOR } : undefined,
     shadow: SHADOW_BLUR > 0 ? { offsetX: SHADOW_OFFSET_X, offsetY: SHADOW_OFFSET_Y, blur: SHADOW_BLUR, color: SHADOW_COLOR, opacity: SHADOW_OPACITY } : undefined,
   });
+  const insets = getContainInsets(canvas, padding, imageRect);
+  const bandY = canvas.height - PADDING_BOTTOM / 2 - insets.bottom;
 
   const context = canvas.getContext('2d')!;
   context.fillStyle = TEXT_COLOR;
@@ -77,8 +80,8 @@ const CUSTOM_TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, 
   context.font = `${FONT_STYLE} ${FONT_WEIGHT} ${FONT_SIZE}px ${actualFontFamily}`;
   context.textAlign = TEXT_ALIGN as CanvasTextAlign;
   context.globalAlpha = TEXT_ALPHA;
-  context.fillText(TEXT1, TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'center' ? canvas.width / 2 : canvas.width - PADDING_RIGHT, canvas.height - PADDING_BOTTOM / 2 - FONT_SIZE / 1.5);
-  context.fillText(TEXT2, TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'center' ? canvas.width / 2 : canvas.width - PADDING_RIGHT, canvas.height - PADDING_BOTTOM / 2 + FONT_SIZE / 1.5);
+  context.fillText(TEXT1, TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'center' ? canvas.width / 2 : canvas.width - PADDING_RIGHT, bandY - FONT_SIZE / 1.5);
+  context.fillText(TEXT2, TEXT_ALIGN === 'left' ? PADDING_LEFT : TEXT_ALIGN === 'center' ? canvas.width / 2 : canvas.width - PADDING_RIGHT, bandY + FONT_SIZE / 1.5);
   context.globalAlpha = 1;
 
   return canvas;
