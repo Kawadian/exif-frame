@@ -340,16 +340,15 @@ const ThemeSettingsPage = () => {
   if (isMobile) {
     return (
       <Page style={{ paddingBottom: '10rem' }}>
-        {/* Preview stays sticky; list/customize tabs scroll away so they don't block options */}
+        {/* Preview + list/customize stay sticky; frame/photo/text tabs scroll with content */}
         <div className="sticky z-50 bg-gray-100 dark:bg-black shadow-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
           <Preview ref={previewRef} height={previewHeight} onHeightChange={setPreviewHeight} />
           <div className="flex justify-center pb-2 gap-2">
             <RerenderButton />
             <RerenderButton isZoomReset onClick={() => previewRef.current?.resetZoom()} />
           </div>
+          {renderSubTabs()}
         </div>
-
-        {renderSubTabs()}
 
         {/* テーマリスト */}
         {activeSubTab === 'list' && (
@@ -410,11 +409,11 @@ const ThemeSettingsPage = () => {
             drawerOpen ? 'w-96' : 'w-0'
           } overflow-hidden`}
         >
-          <div className="flex-1 overflow-y-auto">
-            {/* Drawer tabs scroll with content so they don't permanently cover options */}
-            {renderSubTabs()}
+          {/* List/customize tabs stay fixed at the top of the drawer */}
+          <div className="shrink-0 sticky top-0 z-10 bg-white dark:bg-black">{renderSubTabs()}</div>
 
-            {/* Drawer content */}
+          <div className="flex-1 overflow-y-auto">
+            {/* Drawer content — frame/photo/text tabs scroll with options */}
             <div className="p-4">
               {activeSubTab === 'list' && (
                 <>
