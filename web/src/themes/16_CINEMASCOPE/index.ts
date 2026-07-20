@@ -1,17 +1,18 @@
 import Photo from '../../core/photo';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption } from '../../pages/theme/types/theme-option';
-import { MAX_SIZE } from '../../core/drawing/sandbox';
+import { getMaxSize } from '../../core/drawing/sandbox';
 
 const CINEMASCOPE_OPTIONS: ThemeOption[] = [];
 
 const CINEMASCOPE_FUNC: ThemeFunc = (photo: Photo) => {
   const canvas = document.createElement('canvas');
+  const maxSize = getMaxSize();
 
-  canvas.width = MAX_SIZE;
-  canvas.height = MAX_SIZE * (1 / 2.35) * 1.311875;
+  canvas.width = maxSize;
+  canvas.height = maxSize * (1 / 2.35) * 1.311875;
 
-  const letterbox = (canvas.height - MAX_SIZE * (1 / 2.35)) / 2;
+  const letterbox = (canvas.height - maxSize * (1 / 2.35)) / 2;
   const ratio = photo.image.height / photo.image.width;
   const ctx = canvas.getContext('2d')!;
 

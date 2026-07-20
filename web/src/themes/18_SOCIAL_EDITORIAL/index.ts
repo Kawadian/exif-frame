@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox from '../../core/drawing/sandbox';
+import sandbox, { getSizeScale } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
@@ -207,16 +207,17 @@ const drawBaseCanvas = (photo: Photo, input: ThemeOptionInput, store: Store) => 
 };
 
 const getLayoutMetrics = (canvas: HTMLCanvasElement, input: ThemeOptionInput): LayoutMetrics => {
+  const sizeScale = getSizeScale();
   const PADDING_TOP = input.get('PADDING_TOP') as number;
   const PADDING_BOTTOM = input.get('PADDING_BOTTOM') as number;
   const PADDING_LEFT = input.get('PADDING_LEFT') as number;
   const PADDING_RIGHT = input.get('PADDING_RIGHT') as number;
-  const minSideInset = Math.max(48, Math.min(canvas.width, canvas.height) * 0.035);
+  const minSideInset = Math.max(48 * sizeScale, Math.min(canvas.width, canvas.height) * 0.035);
   const maxSideInset = Math.max(minSideInset, canvas.width * 0.18);
   const left = clamp(PADDING_LEFT, minSideInset, maxSideInset);
   const right = clamp(PADDING_RIGHT, minSideInset, maxSideInset);
-  const topBand = clamp(PADDING_TOP, 96, Math.max(96, canvas.height * 0.24));
-  const bottomBand = clamp(PADDING_BOTTOM, 128, Math.max(128, canvas.height * 0.26));
+  const topBand = clamp(PADDING_TOP, 96 * sizeScale, Math.max(96 * sizeScale, canvas.height * 0.24));
+  const bottomBand = clamp(PADDING_BOTTOM, 128 * sizeScale, Math.max(128 * sizeScale, canvas.height * 0.26));
   const fontScale = clamp(Math.min(canvas.width / 3000, canvas.height / 2400), 0.72, 1.08);
 
   return {
@@ -224,15 +225,18 @@ const getLayoutMetrics = (canvas: HTMLCanvasElement, input: ThemeOptionInput): L
     right,
     availableWidth: Math.max(1, canvas.width - left - right),
     centerX: canvas.width / 2,
-    footerY: clamp(canvas.height - bottomBand / 2, 96, canvas.height - 96),
-    headerY: clamp(topBand / 2, 72, Math.max(72, canvas.height - 96)),
+    footerY: clamp(canvas.height - bottomBand / 2, 96 * sizeScale, canvas.height - 96 * sizeScale),
+    headerY: clamp(topBand / 2, 72 * sizeScale, Math.max(72 * sizeScale, canvas.height - 96 * sizeScale)),
     fontScale,
   };
 };
 
-const scaled = (size: number, scale: number, multiplier = 1) => Math.max(18, Math.round(size * scale * multiplier));
+const scaled = (size: number, scale: number, multiplier = 1) => Math.max(18 * getSizeScale(), Math.round(size * scale * multiplier));
 
-const safeY = (canvas: HTMLCanvasElement, y: number, inset = 32) => clamp(y, inset, canvas.height - inset);
+const safeY = (canvas: HTMLCanvasElement, y: number, inset = 32) => {
+  const scaledInset = inset * getSizeScale();
+  return clamp(y, scaledInset, canvas.height - scaledInset);
+};
 
 const prepareText = (canvas: HTMLCanvasElement, input: ThemeOptionInput) => {
   const context = canvas.getContext('2d')!;
