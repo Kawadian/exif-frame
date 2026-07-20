@@ -2,6 +2,27 @@ import Photo from '../photo';
 
 export const MAX_SIZE = 4096; // Mobile Safari has a maximum canvas size of 4096x4096
 
+let previewMaxSize: number | null = null;
+
+const getMaxSize = (): number => previewMaxSize ?? MAX_SIZE;
+
+/** Scale factor relative to full-size export canvas (1 in normal renders). */
+const getSizeScale = (): number => getMaxSize() / MAX_SIZE;
+
+/**
+ * Run a theme render at a reduced canvas size for list thumbnails.
+ * Theme code that uses getMaxSize/getSizeScale will shrink with the preview.
+ */
+const runWithPreviewMaxSize = <T>(size: number, fn: () => T): T => {
+  const previous = previewMaxSize;
+  previewMaxSize = size;
+  try {
+    return fn();
+  } finally {
+    previewMaxSize = previous;
+  }
+};
+
 interface SandboxOptions {
   backgroundColor: string;
   padding: { top: number; bottom: number; left: number; right: number };
@@ -102,18 +123,19 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
   const padding = sanitizePadding(options.padding);
   const { top, bottom, left, right } = padding;
   const canvas = document.createElement('canvas');
+  const maxSize = getMaxSize();
 
   if (targetRatio === 'free') {
-    const availableWidth = Math.max(1, MAX_SIZE - left - right);
-    const availableHeight = Math.max(1, MAX_SIZE - top - bottom);
+    const availableWidth = Math.max(1, maxSize - left - right);
+    const availableHeight = Math.max(1, maxSize - top - bottom);
     const scale = image.width >= image.height ? availableWidth / image.width : availableHeight / image.height;
     const imgWidth = image.width * scale;
     const imgHeight = image.height * scale;
     const imgX = left;
     const imgY = top;
 
-    canvas.width = Math.min(MAX_SIZE, imgWidth + left + right);
-    canvas.height = Math.min(MAX_SIZE, imgHeight + top + bottom);
+    canvas.width = Math.min(maxSize, imgWidth + left + right);
+    canvas.height = Math.min(maxSize, imgHeight + top + bottom);
 
     const context = canvas.getContext('2d')!;
     drawBackground(context, canvas, image, backgroundColor, blurBackground);
@@ -129,11 +151,11 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
   }
 
   if (ratio[0] > ratio[1]) {
-    canvas.width = MAX_SIZE;
-    canvas.height = (ratio[1] / ratio[0]) * MAX_SIZE;
+    canvas.width = maxSize;
+    canvas.height = (ratio[1] / ratio[0]) * maxSize;
   } else {
-    canvas.width = (ratio[0] / ratio[1]) * MAX_SIZE;
-    canvas.height = MAX_SIZE;
+    canvas.width = (ratio[0] / ratio[1]) * maxSize;
+    canvas.height = maxSize;
   }
 
   const context = canvas.getContext('2d')!;
@@ -158,3 +180,4 @@ const sandbox = (photo: Photo, options: SandboxOptions): HTMLCanvasElement => {
 };
 
 export default sandbox;
+export { getMaxSize, getSizeScale, runWithPreviewMaxSize };

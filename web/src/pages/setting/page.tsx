@@ -1,4 +1,4 @@
-import { List, Navbar, Page, Tabbar, TabbarLink } from 'konsta/react';
+import { List, Page, Tabbar, TabbarLink } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
 import DarkModeListItem from './components/dark-mode.list-item';
 import LanguageListItem from './components/language.list-item';
@@ -39,8 +39,6 @@ const ExportSettingsPage = () => {
 
   return (
     <Page style={{ paddingBottom: '10rem' }}>
-      <Navbar large transparent title={t('root.settings')} />
-
       <List strongIos inset>
         <DarkModeListItem />
         <LanguageListItem />

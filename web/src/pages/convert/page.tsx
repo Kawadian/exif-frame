@@ -1,4 +1,4 @@
-import { BlockTitle, List, ListItem, Navbar, Page, Tabbar, TabbarLink, Toolbar } from 'konsta/react';
+import { BlockTitle, List, ListItem, Page, Tabbar, TabbarLink, Toolbar } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
 import AddPhotoButton from './components/add-photo.button';
 import { useStore } from '../../store';
@@ -22,8 +22,6 @@ const FramePage = () => {
 
   return (
     <Page style={{ paddingBottom: '10rem' }}>
-      <Navbar large transparent title={t('root.convert')} />
-
       <Toolbar className="bottom-12 fixed">
         <AddPhotoButton />
         <DownloadAllPhotoButton />

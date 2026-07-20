@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox from '../../core/drawing/sandbox';
+import sandbox, { getSizeScale } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import * as CommonOptions from '../common-options';
@@ -60,6 +60,8 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
   });
 
   const context = canvas.getContext('2d')!;
+  const sizeScale = getSizeScale();
+  const px = (value: number) => value * sizeScale;
   context.fillStyle = TEXT_COLOR;
   context.textBaseline = 'bottom';
   context.globalAlpha = TEXT_ALPHA;
@@ -72,37 +74,37 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
     ];
 
     context.textAlign = 'right';
-    context.font = `100px ${actualFontFamily}`;
+    context.font = `${px(100)}px ${actualFontFamily}`;
     for (let i = 0; i < datas.length; i++) {
       const data = datas[i];
-      context.fillText(data.value, canvas.width - 100, canvas.height - 100 - i * 100);
+      context.fillText(data.value, canvas.width - px(100), canvas.height - px(100) - i * px(100));
       const width = context.measureText(data.value).width;
-      context.font = `60px ${actualFontFamily}`;
-      context.fillText(data.key, canvas.width - 100 - width - 20, canvas.height - 110 - i * 100);
-      context.font = `100px ${actualFontFamily}`;
+      context.font = `${px(60)}px ${actualFontFamily}`;
+      context.fillText(data.key, canvas.width - px(100) - width - px(20), canvas.height - px(110) - i * px(100));
+      context.font = `${px(100)}px ${actualFontFamily}`;
     }
   }
 
-  context.font = `70px ${actualFontFamily}`;
+  context.font = `${px(70)}px ${actualFontFamily}`;
   context.textAlign = 'left';
   context.fillText(
     [store.showLensModel ? store.overrideLensModel || photo.lensModel : null]
       .filter(Boolean)
       .map((value) => value!.trim())
       .join(' '),
-    100,
-    canvas.height - 105
+    px(100),
+    canvas.height - px(105)
   );
   context.fillText(
     [store.showCameraMaker ? store.overrideCameraMaker || photo.make : null, store.showCameraModel ? store.overrideCameraModel || photo.model : null]
       .filter(Boolean)
       .map((value) => value!.trim())
       .join(' '),
-    100,
-    canvas.height - 205
+    px(100),
+    canvas.height - px(205)
   );
-  context.font = `50px ${actualFontFamily}`;
-  context.fillText(ARTIST ? ARTIST : photo.takenAt, 100, canvas.height - 305);
+  context.font = `${px(50)}px ${actualFontFamily}`;
+  context.fillText(ARTIST ? ARTIST : photo.takenAt, px(100), canvas.height - px(305));
 
   context.globalAlpha = 1;
 

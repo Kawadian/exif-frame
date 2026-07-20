@@ -1,6 +1,6 @@
 import Photo from '../../core/photo';
 import { Store } from '../../store';
-import sandbox from '../../core/drawing/sandbox';
+import sandbox, { getSizeScale } from '../../core/drawing/sandbox';
 import { ThemeFunc } from '../../core/drawing/theme';
 import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-option';
 import overrideExifMetadata from '../../core/exif-metadata/override-exif-metadata';
@@ -38,8 +38,9 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
   const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
   const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
   const SECONDARY_TEXT_FONT_WEIGHT = input.get('SECONDARY_TEXT_FONT_WEIGHT') as number;
+  const sizeScale = getSizeScale();
   const PADDING_TOP = input.get('PADDING_TOP') as number;
-  const PADDING_BOTTOM = (input.get('PADDING_BOTTOM') as number) + 300;
+  const PADDING_BOTTOM = (input.get('PADDING_BOTTOM') as number) + 300 * sizeScale;
   const PADDING_LEFT = input.get('PADDING_LEFT') as number;
   const PADDING_RIGHT = input.get('PADDING_RIGHT') as number;
   const PHOTO_BORDER_WIDTH = input.get('PHOTO_BORDER_WIDTH') as number;
@@ -53,7 +54,7 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
   const TEMPLATE2 = (input.get('TEMPLATE2') as string).trim();
   const TEMPLATE3 = (input.get('TEMPLATE3') as string).trim();
   const TEMPLATE4 = (input.get('TEMPLATE4') as string).trim();
-  const FONT_SIZE = 70;
+  const FONT_SIZE = 70 * sizeScale;
   const BACKGROUND_COLOR = DARK_MODE ? '#000000' : '#ffffff';
   const PRIMARY_TEXT_COLOR = DARK_MODE ? '#ffffff' : '#000000';
   const SECONDARY_TEXT_COLOR = DARK_MODE ? '#888888' : '#333333';
@@ -186,12 +187,12 @@ const STRAP_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Sto
   context.moveTo(canvas.width - Math.max(topWidth, bottomWidth) - FONT_SIZE * 2, canvas.height - PADDING_BOTTOM / 2 - FONT_SIZE);
   context.lineTo(canvas.width - Math.max(topWidth, bottomWidth) - FONT_SIZE * 2, canvas.height - PADDING_BOTTOM / 2 + FONT_SIZE);
   context.strokeStyle = SECONDARY_TEXT_COLOR;
-  context.lineWidth = 2;
+  context.lineWidth = 2 * sizeScale;
   context.stroke();
 
   // DRAW ICON
   let TARGET_LOGO_HEIGHT = FONT_SIZE * 2;
-  const TARGET_LOGO_WIDTH = 400;
+  const TARGET_LOGO_WIDTH = 400 * sizeScale;
 
   const maker = overrideExifMetadata()?.make || photo.metadata.make;
   const model = overrideExifMetadata()?.model || photo.metadata.model;

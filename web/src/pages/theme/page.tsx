@@ -1,4 +1,4 @@
-import { BlockTitle, List, Navbar, Page, Tabbar, TabbarLink } from 'konsta/react';
+import { BlockTitle, List, Page, Tabbar, TabbarLink } from 'konsta/react';
 import { useTranslation } from 'react-i18next';
 import { Fragment, useEffect, useRef, useState } from 'react';
 import { useStore } from '../../store';
@@ -19,6 +19,7 @@ import render from '../../core/drawing/render';
 import { ThemeOptionInput, getConverter } from './types/theme-option';
 import Customize from './database/customize';
 import free from '../../core/drawing/free';
+import { themeListPreviewQueue } from './components/theme-list-preview';
 
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 3;
@@ -225,14 +226,16 @@ const ThemeSettingsPage = () => {
     };
 
     window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      themeListPreviewQueue.invalidate();
+    };
   }, []);
 
   // Mobile layout (existing vertical layout)
   if (isMobile) {
     return (
       <Page style={{ paddingBottom: '10rem' }}>
-        <Navbar large transparent title={t('root.themes')} />
         <div className="sticky z-50 bg-gray-100 dark:bg-black shadow-md" style={{ top: 'env(safe-area-inset-top, 0px)' }}>
           <Preview ref={previewRef} height={previewHeight} onHeightChange={setPreviewHeight} />
           <div className="flex justify-center pb-2 gap-2">
@@ -317,9 +320,7 @@ const ThemeSettingsPage = () => {
   // Desktop layout (Lightroom-style with drawer)
   return (
     <Page>
-      <Navbar large transparent title={t('root.themes')} />
-      
-      <div className="flex" style={{ height: 'calc(100vh - env(safe-area-inset-top, 0px) - 4rem - 5rem)' }}>
+      <div className="flex" style={{ height: 'calc(100vh - env(safe-area-inset-top, 0px) - 5rem)' }}>
         {/* Left side: Preview */}
         <div className="flex-1 flex flex-col bg-gray-300 dark:bg-gray-900 overflow-hidden">
           <div className="flex-1 flex items-center justify-center overflow-hidden">
