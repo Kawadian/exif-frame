@@ -62,7 +62,7 @@ const CUSTOM_TWO_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, 
   const SHADOW_OPACITY = input.get('SHADOW_OPACITY') as number;
 
   const canvas = sandbox(photo, {
-    targetRatio: ASPECT_RATIO === 'free' ? store.ratio : ASPECT_RATIO,
+    targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },

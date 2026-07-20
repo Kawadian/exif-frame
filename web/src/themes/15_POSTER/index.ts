@@ -6,6 +6,7 @@ import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-opt
 import * as CommonOptions from '../common-options';
 
 const POSTER_OPTIONS: ThemeOption[] = [
+  CommonOptions.createAspectRatioOption(),
   CommonOptions.createDarkModeOption(false),
   CommonOptions.createBlurBackgroundOption(),
   CommonOptions.createBlurAmountOption(),
@@ -39,6 +40,7 @@ const POSTER_OPTIONS: ThemeOption[] = [
 ];
 
 const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
+  const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const DARK_MODE = input.get('DARK_MODE') as boolean;
   const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
   const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
@@ -72,7 +74,7 @@ const POSTER_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: St
   const SHADOW_SIZE = input.get('SHADOW_SIZE') as number;
 
   const canvas = sandbox(photo, {
-    targetRatio: store.ratio,
+    targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: DARK_MODE ? '#ffffff' : '#000000',
     padding: { top: 0, right: 0, bottom: 0, left: 0 },

@@ -8,6 +8,7 @@ import { getCameraMakerLogo } from '../maker-logo';
 import * as CommonOptions from '../common-options';
 
 const THREE_LINE_OPTIONS: ThemeOption[] = [
+  CommonOptions.createAspectRatioOption(),
   CommonOptions.createBackgroundColorOption('#ffffff'),
   CommonOptions.createBlurBackgroundOption(),
   CommonOptions.createBlurAmountOption(),
@@ -43,6 +44,7 @@ const THREE_LINE_OPTIONS: ThemeOption[] = [
 
 const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
   // Background & Padding
+  const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const BACKGROUND_COLOR = (input.get('BACKGROUND_COLOR') as string).trim();
   const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
   const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
@@ -81,7 +83,7 @@ const THREE_LINE_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store
   const TEMPLATE2 = (input.get('TEMPLATE2') as string).trim();
 
   const canvas = sandbox(photo, {
-    targetRatio: store.ratio,
+    targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: PADDING_INSIDE ? { top: 0, right: 0, bottom: 0, left: 0 } : { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },

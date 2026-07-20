@@ -6,6 +6,7 @@ import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-opt
 import * as CommonOptions from '../common-options';
 
 const FILM_OPTIONS: ThemeOption[] = [
+  CommonOptions.createAspectRatioOption(),
   CommonOptions.createArtistOption(''),
   CommonOptions.createFontFamilyOption('digital-7'),
   CommonOptions.createTextColorOption('#FFA500'),
@@ -27,6 +28,7 @@ const FILM_OPTIONS: ThemeOption[] = [
 ];
 
 const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
+  const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const ARTIST = (input.get('ARTIST') as string).trim();
   const FONT_FAMILY = (input.get('FONT_FAMILY') as string).trim();
   const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
@@ -48,7 +50,7 @@ const FILM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Stor
   const SHADOW_OPACITY = input.get('SHADOW_OPACITY') as number;
 
   const canvas = sandbox(photo, {
-    targetRatio: store.ratio,
+    targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },

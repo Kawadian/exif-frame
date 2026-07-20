@@ -6,6 +6,7 @@ import { ThemeOption, ThemeOptionInput } from '../../pages/theme/types/theme-opt
 import * as CommonOptions from '../common-options';
 
 const LIGHTROOM_OPTIONS: ThemeOption[] = [
+  CommonOptions.createAspectRatioOption(),
   CommonOptions.createBackgroundColorOption('#1f1f1f'),
   CommonOptions.createBlurBackgroundOption(),
   CommonOptions.createBlurAmountOption(),
@@ -28,6 +29,7 @@ const LIGHTROOM_OPTIONS: ThemeOption[] = [
 ];
 
 const LIGHTROOM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store: Store) => {
+  const ASPECT_RATIO = (input.get('ASPECT_RATIO') as string).trim();
   const BACKGROUND_COLOR = (input.get('BACKGROUND_COLOR') as string).trim();
   const BLUR_BACKGROUND = input.get('BLUR_BACKGROUND') as boolean;
   const BLUR_AMOUNT = input.get('BLUR_AMOUNT') as number;
@@ -50,7 +52,7 @@ const LIGHTROOM_FUNC: ThemeFunc = (photo: Photo, input: ThemeOptionInput, store:
   const actualFontFamily = FONT_FAMILY === 'Default' ? 'sans-serif' : FONT_FAMILY;
 
   const canvas = sandbox(photo, {
-    targetRatio: store.ratio,
+    targetRatio: ASPECT_RATIO,
     notCroppedMode: store.notCroppedMode,
     backgroundColor: BACKGROUND_COLOR,
     padding: { top: PADDING_TOP, right: PADDING_RIGHT, bottom: PADDING_BOTTOM, left: PADDING_LEFT },

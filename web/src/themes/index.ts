@@ -11,6 +11,7 @@ import { POSTER_FUNC, POSTER_OPTIONS } from './15_POSTER';
 import { CINEMASCOPE_FUNC, CINEMASCOPE_OPTIONS } from './16_CINEMASCOPE';
 import { SOCIAL_EDITORIAL_FUNC, SOCIAL_EDITORIAL_OPTIONS, SOCIAL_GALLERY_FUNC, SOCIAL_GALLERY_OPTIONS, SOCIAL_REEL_FUNC, SOCIAL_REEL_OPTIONS } from './18_SOCIAL_EDITORIAL';
 import { SHOT_CARD_FUNC, SHOT_CARD_OPTIONS } from './19_SHOT_CARD';
+import Customize from '../pages/theme/database/customize';
 
 type AcceptInputType = string | number | boolean;
 
@@ -54,6 +55,24 @@ const themes = [
   { name: 'Editorial Logo', func: SOCIAL_EDITORIAL_FUNC, options: SOCIAL_EDITORIAL_OPTIONS },
   { name: 'Shot Card', func: SHOT_CARD_FUNC, options: SHOT_CARD_OPTIONS },
 ];
+
+/** Move legacy export-settings ratio into per-theme customize when unset. */
+const migrateLegacyGlobalRatio = () => {
+  if (localStorage.getItem('legacyRatioMigrated') === 'true') return;
+
+  const legacyRatio = localStorage.getItem('ratio');
+  if (legacyRatio && legacyRatio !== 'free') {
+    for (const theme of themes) {
+      if (!theme.options.some((option) => option.id === 'ASPECT_RATIO')) continue;
+      if (Customize.get(theme.name, 'ASPECT_RATIO', String) !== null) continue;
+      Customize.set(theme.name, 'ASPECT_RATIO', legacyRatio);
+    }
+  }
+
+  localStorage.setItem('legacyRatioMigrated', 'true');
+};
+
+migrateLegacyGlobalRatio();
 
 export default themes;
 export { useThemeStore };
