@@ -1,5 +1,5 @@
 import { ListInput, ListItem, Range, Toggle } from 'konsta/react';
-import { useEffect, useState, useMemo, ChangeEvent } from 'react';
+import { useEffect, useState, useMemo, useRef, ChangeEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useStore } from '../../../store';
 import Customize from '../database/customize';
@@ -14,10 +14,22 @@ const getNumberSliderBounds = (props: Extract<ThemeOption, { type: 'number' }>, 
   return { min, max, step };
 };
 
+const isPartialNumberInput = (raw: string, allowDecimal: boolean) => {
+  if (raw === '' || raw === '-') {
+    return true;
+  }
+  if (allowDecimal && (raw === '.' || raw === '-.')) {
+    return true;
+  }
+  return allowDecimal ? /^-?\d*\.?\d*$/.test(raw) : /^-?\d*$/.test(raw);
+};
+
 const ThemeOptionListInput = (props: ThemeOption) => {
   const { t } = useTranslation();
   const { selectedThemeName, rerenderOptions, darkMode, setRerenderOptions } = useStore();
   const [value, setValue] = useState(Customize.get(selectedThemeName, props.id, getConverter(props.type)) ?? props.default);
+  const [draft, setDraft] = useState(() => String(Customize.get(selectedThemeName, props.id, getConverter(props.type)) ?? props.default));
+  const isEditingRef = useRef(false);
 
   const optionTitle = useMemo(() => {
     if (props.description && props.description.startsWith('theme.option.')) {
@@ -39,26 +51,58 @@ const ThemeOptionListInput = (props: ThemeOption) => {
   );
 
   useEffect(() => {
-    setValue(Customize.get(selectedThemeName, props.id, getConverter(props.type)) ?? props.default);
+    if (isEditingRef.current) {
+      return;
+    }
+    const next = Customize.get(selectedThemeName, props.id, getConverter(props.type)) ?? props.default;
+    setValue(next);
+    if (props.type === 'number' || props.type === 'range-slider') {
+      setDraft(String(next));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedThemeName, rerenderOptions]);
 
-  const saveNumericValue = (newValue: number) => {
+  const saveNumericValue = (newValue: number, syncDraft = true) => {
     setValue(newValue);
+    if (syncDraft && !isEditingRef.current) {
+      setDraft(String(newValue));
+    }
     debouncedSaveAndRerender(selectedThemeName, props.id, newValue);
+  };
+
+  const commitNumericDraft = (min: number, max: number, defaultValue: number) => {
+    isEditingRef.current = false;
+    const parsed = Number(draft);
+    const next = draft === '' || draft === '-' || draft === '.' || draft === '-.' || Number.isNaN(parsed) ? defaultValue : Math.min(max, Math.max(min, parsed));
+    setDraft(String(next));
+    setValue(next);
+    debouncedSaveAndRerender.cancel();
+    Customize.set(selectedThemeName, props.id, next);
+    setRerenderOptions();
   };
 
   const handleNumberInputChange = (e: ChangeEvent<HTMLInputElement>, step: number) => {
     const raw = e.target.value;
-    if (raw === '' || raw === '-') {
-      setValue(raw);
+    const allowDecimal = step < 1;
+    if (!isPartialNumberInput(raw, allowDecimal)) {
       return;
     }
-    const parsed = step < 1 ? Number(raw) : Number.parseInt(raw, 10);
+
+    setDraft(raw);
+
+    if (raw === '' || raw === '-' || raw === '.' || raw === '-.') {
+      debouncedSaveAndRerender.cancel();
+      return;
+    }
+
+    const parsed = Number(raw);
     if (Number.isNaN(parsed)) {
       return;
     }
-    saveNumericValue(parsed);
+
+    // Update preview while typing, but never clamp or autofill mid-edit.
+    setValue(parsed);
+    debouncedSaveAndRerender(selectedThemeName, props.id, parsed);
   };
 
   const renderNumericControl = (min: number, max: number, step: number) => {
@@ -69,32 +113,35 @@ const ThemeOptionListInput = (props: ThemeOption) => {
     return (
       <div className="flex w-full min-w-0 flex-col gap-2 py-0.5">
         <span className="leading-tight">{optionTitle}</span>
-        <div className="flex min-w-0 items-center gap-3">
+        <div className="flex w-full min-w-0 items-center gap-3">
           <input
-            type="number"
+            type="text"
+            inputMode={step < 1 ? 'decimal' : 'numeric'}
             name={props.id}
-            value={value as string | number}
-            min={min}
-            max={max}
-            step={step}
+            value={draft}
             className="w-16 shrink-0 rounded-md border border-black/15 bg-transparent px-2 py-1 text-sm tabular-nums dark:border-white/20"
+            onFocus={() => {
+              isEditingRef.current = true;
+              setDraft(String(value));
+            }}
             onChange={(e) => handleNumberInputChange(e, step)}
-            onBlur={() => {
-              if (value === '' || value === '-' || Number.isNaN(Number(value))) {
-                saveNumericValue(defaultValue);
-              }
-            }}
+            onBlur={() => commitNumericDraft(min, max, defaultValue)}
           />
-          <Range
-            value={sliderValue}
-            min={min}
-            max={max}
-            step={step}
-            className="flex-1"
-            onChange={(e) => {
-              saveNumericValue(Number(e.target.value));
-            }}
-          />
+          <div className="min-w-0 flex-1">
+            <Range
+              value={sliderValue}
+              min={min}
+              max={max}
+              step={step}
+              className="w-full"
+              onChange={(e) => {
+                isEditingRef.current = false;
+                const next = Number(e.target.value);
+                setDraft(String(next));
+                saveNumericValue(next);
+              }}
+            />
+          </div>
         </div>
       </div>
     );
@@ -102,11 +149,23 @@ const ThemeOptionListInput = (props: ThemeOption) => {
 
   if (props.type === 'number') {
     const { min, max, step } = getNumberSliderBounds(props, Number(value) || 0);
-    return <ListItem key={props.id} title={renderNumericControl(min, max, step)} titleWrapClassName="w-full" />;
+    return (
+      <ListItem
+        key={props.id}
+        title={renderNumericControl(min, max, step)}
+        titleWrapClassName="w-full [&>div]:w-full [&>div]:min-w-0 [&>div]:flex-1"
+      />
+    );
   }
 
   if (props.type === 'range-slider') {
-    return <ListItem key={props.id} title={renderNumericControl(props.min, props.max, props.step)} titleWrapClassName="w-full" />;
+    return (
+      <ListItem
+        key={props.id}
+        title={renderNumericControl(props.min, props.max, props.step)}
+        titleWrapClassName="w-full [&>div]:w-full [&>div]:min-w-0 [&>div]:flex-1"
+      />
+    );
   }
 
   return (
